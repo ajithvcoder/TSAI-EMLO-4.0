@@ -1,0 +1,30 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test Docker and Training
+      id: test-docker-and-training
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Test Docker and Training
+        setup-command: ''
+        command: bash ./tests/grading.sh
+        timeout: 10
+        max-score: 500
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-DOCKER-AND-TRAINING_RESULTS: "${{steps.test-docker-and-training.outputs.result}}"
+      with:
+        runners: test-docker-and-training

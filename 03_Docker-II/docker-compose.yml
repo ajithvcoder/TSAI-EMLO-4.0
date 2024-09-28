@@ -1,0 +1,36 @@
+# version: '3.8'
+
+
+
+services:
+    train:
+        build:
+            context: model-train
+            dockerfile: Dockerfile.train
+        volumes:
+            - mnist:/opt/mount
+            - ./model:/workspace/model
+
+    evaluate:
+        build:
+            context: model-eval
+            dockerfile: Dockerfile.eval
+        volumes:
+            - mnist:/opt/mount
+            - ./model:/workspace/model
+        depends_on:
+            - train
+    
+    infer:
+        build:
+            context: model-infer
+            dockerfile: Dockerfile.infer
+        volumes:
+            - mnist:/opt/mount
+            - ./model:/workspace/model
+        depends_on:
+            - train
+
+volumes:
+    mnist:
+        name: "mnist_mnist"
