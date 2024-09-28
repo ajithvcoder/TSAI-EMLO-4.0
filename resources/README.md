@@ -18,3 +18,7 @@ Has important links, tools, blogs or concepts that i learnt during EMLO-4.0
 
 - Use NVIDIA Time slicing for Low end GPUS
 - Use NVIDIA MIG for high end GPUs
+
+**LLM**
+
+- Use vLLM to serve to large number of users and with batch serving
