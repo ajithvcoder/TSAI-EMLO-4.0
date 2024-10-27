@@ -1,0 +1,32 @@
+
+# TODO: Check if logger can be enabled
+
+defaults:
+  - _self_
+  - data: dogbreed
+  - model: dogbreed_classifier
+  - logger: default
+  - paths: default
+  - trainer: default
+  - hydra: default
+  - callbacks: default
+  - debug: null
+  # - override /callbacks: default
+  - experiment: dogbreed_ex
+
+task_name: "infer"
+tags: ["dev"]
+train: False
+test: true
+infer: true
+# ckpt_path: null
+seed: null
+
+
+callbacks:
+  model_checkpoint:
+    monitor: "val_acc"
+    mode: "max"
+    save_top_k: 1
+    save_last: True
+    filename: "/workspace/model_storage/epoch-checkpoint.ckpt"

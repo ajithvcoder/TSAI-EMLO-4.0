@@ -1,0 +1,5 @@
+[core]
+    remote = myremote1
+    autostage = true
+['remote "myremote1"']
+    url = gs://dvcmanager/storage

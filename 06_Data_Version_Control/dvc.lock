@@ -1,0 +1,42 @@
+schema: '2.0'
+stages:
+  train:
+    cmd: python src/train.py --config-name=train experiment=catdog_ex trainer.max_epochs=5
+    deps:
+    - path: configs/experiment/catdog_ex.yaml
+      hash: md5
+      md5: 3555c2e29d7882bc51ec9297d76a161d
+      size: 873
+    - path: data/cat_dog_medium
+      hash: md5
+      md5: 9240971950599e126cf0cd23a8a0279c.dir
+      size: 866190740
+      nfiles: 25002
+    - path: src/train.py
+      hash: md5
+      md5: 553225eec1579b40ee5a0ca8ac2ef426
+      size: 3143
+  test:
+    cmd: python src/eval.py --config-name=eval experiment=catdog_ex_eval
+    deps:
+    - path: configs/experiment/catdog_ex_eval.yaml
+      hash: md5
+      md5: 2666cdc12ad439e9f8b2b08c89ba04f0
+      size: 878
+    - path: src/eval.py
+      hash: md5
+      md5: eb792193ac4a76f15eb4b9e957eb2d54
+      size: 3125
+  infer:
+    cmd: python src/infer.py --config-name=infer experiment=catdog_ex_eval
+    deps:
+    - path: configs/experiment/catdog_ex_eval.yaml
+      hash: md5
+      md5: 2666cdc12ad439e9f8b2b08c89ba04f0
+      size: 878
+    - path: src/infer.py
+      hash: md5
+      md5: f1ad84181705202fab857521d74f9027
+      size: 4185
+  report_genration:
+    cmd: python scripts/metrics_fetch.py

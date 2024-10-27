@@ -1,0 +1,23 @@
+
+# TODO: Check if logger can be enabled
+
+defaults:
+  - _self_
+  - data: dogbreed
+  - model: dogbreed_classifier
+  - logger: default
+  - paths: default
+  - trainer: default
+  - callbacks: default
+  - hydra: default
+
+  - experiment: dogbreed_ex_train
+
+  - debug: null
+
+task_name: "train"
+tags: ["dev"]
+train: true
+test: false
+ckpt_path: null
+seed: null
