@@ -48,6 +48,25 @@ Website: [On Development]
 
     A session covering various experiment tracking tools such as Tensorboard, MLFlow and an overview of Hyperparameter Optimization techniques using Optuna and Bayesian Optimization.
 
+8. [AWS Crash Course](./08_AWS_Crash_Course/)
+
+    A session on AWS, covering EC2, S3, ECS, ECR, and Fargate, with a focus on deploying machine learning models on AWS.    
+
+9. [Model Deployment w/ FastAPI](./09_Deployment_with_LitServe/)
+
+    A hands-on session on deploying machine learning models using FastAPI, a modern, fast, web framework for building APIs.
+
+10. [Model Deployment for Demos](./10_Deployment_with_Gradio/)
+
+    Gradio, an open-source platform for creating and sharing demos of machine learning models, and a session on Model Tracing.
+
+11. [Model Deployment on Serverless](./11_Deployment_with_Serverless/)
+
+    An overview of Serverless deployment of machine learning models, including an introduction to AWS Lambda
+
+12. [Model Deployment w/ TorchServe](./12_Deployment_with_TorchServe/)
+
+    An introduction to TorchServe, a PyTorch model serving library, and a hands-on session on deploying machine learning models using TorchServe.
 
 **Important tools, method, configs, links**
 
