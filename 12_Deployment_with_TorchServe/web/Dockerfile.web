@@ -1,0 +1,8 @@
+FROM node:23.4.0-bookworm-slim
+WORKDIR /workspace
+
+COPY . .
+
+RUN npm install
+EXPOSE 3000
+CMD  ["npm", "run", "dev"]

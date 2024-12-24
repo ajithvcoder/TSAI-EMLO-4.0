@@ -1,0 +1,71 @@
+services:
+  torchserve_service:
+    container_name: dtorchserve
+    env_file:
+      - .env
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+    build: 
+      context: ./torchserve
+      dockerfile: Dockerfile.torchserve
+    ports:
+    - "8080:8080"
+    - "8081:8081"
+    - "8082:8082"
+    # command: torchserve --start --ts-config=config.properties --model-store model_store --models sd3=sd3.mar --disable-token-auth --ncs --enable-model-api --foreground
+    command: /workspace/torch_serve_start.sh
+    networks:
+      - common_network
+    # volumes:
+    #   - ./torchserve/model_store:/workspace/model_store
+    deploy:
+          resources:
+            reservations:
+              devices:
+                - driver: nvidia
+                  count: 1
+                  capabilities: [gpu]
+
+  fastapi_service:
+    env_file:
+      - .env
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      TORCHSERVE_MANAGEMENT_API: http://dtorchserve:8081
+      TORCHSERVE_INFERENCE_API: http://dtorchserve:8080
+    container_name: dfastapi
+    depends_on:
+      - "torchserve_service"
+    build: 
+      context: ./server
+      dockerfile: Dockerfile.fastapi
+    ports:
+      - "9080:9080"
+    command: ['python',"server.py"]
+    networks:
+      - common_network
+
+
+  web_service:
+    environment:
+      BACKEND_URL: http://dfastapi:9080
+    depends_on:
+      - "torchserve_service"
+      - "fastapi_service"
+    container_name: dweb
+    build: 
+      context: ./web
+      dockerfile: Dockerfile.web
+    ports:
+      - "3000:3000"
+    command: "npm run dev"
+    networks:
+      - common_network
+
+networks:
+  common_network:
+    driver: bridge

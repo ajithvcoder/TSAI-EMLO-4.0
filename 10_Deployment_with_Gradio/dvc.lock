@@ -1,0 +1,44 @@
+schema: '2.0'
+stages:
+  train:
+    cmd: python src/train.py --multirun --config-name=train experiment=catdog_ex trainer.max_epochs=3
+    deps:
+    - path: configs/experiment/catdog_ex.yaml
+      hash: md5
+      md5: d82b5d6fb9758f53546f97bda014f6f2
+      size: 1243
+    - path: data/cats_and_dogs_filtered
+      hash: md5
+      md5: db5ca6baa4721aafd84c3d089b81dd4e.dir
+      size: 68556316
+      nfiles: 3001
+    - path: src/train.py
+      hash: md5
+      md5: 2187aebb7d48a15d6b9671c7c01d0d1b
+      size: 6942
+  report_generation:
+    cmd: python scripts/multirun_metrics_fetch.py
+  test:
+    cmd: python src/eval.py --config-name=eval experiment=catdog_ex
+    deps:
+    - path: configs/experiment/catdog_ex.yaml
+      hash: md5
+      md5: d82b5d6fb9758f53546f97bda014f6f2
+      size: 1243
+    - path: src/eval.py
+      hash: md5
+      md5: 47a9e50a0213ee71ff67a97b71d1ca6e
+      size: 3994
+  infer:
+    cmd: python src/infer.py --config-name=infer experiment=catdog_ex
+    deps:
+    - path: configs/experiment/catdog_ex.yaml
+      hash: md5
+      md5: d82b5d6fb9758f53546f97bda014f6f2
+      size: 1243
+    - path: src/infer.py
+      hash: md5
+      md5: 1b360e17f7740c9bd6eba9c52e0dc5d2
+      size: 4717
+  code-test-coverage:
+    cmd: pytest --cov-report term --cov=src/ tests/
