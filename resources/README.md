@@ -2,7 +2,7 @@
 
 Has important links, tools, blogs or concepts that i learnt during EMLO-4.0
 
-Note: After session-12 most of the notes are stuck in Evernote. They have changed to pay only plan by default. So need to retrive after paying.
+Note: After session-12 most of the notes are stuck in Evernote. They have changed to pay only plan by default. So need to retrive after paying. I have updated the `Tools` name.
 
 ### Ready Docker usage platforms
 
@@ -380,3 +380,29 @@ other pytorch models are stored in .pth
 | 43   |  web servers - front-end reverse proxy | [nginx](https://nginx.org/) |
 | 44   | background monitoring | [celery python](https://github.com/celery/celery)  |
 | 45   | Stable diffusion UI | [next-js sd3](https://github.com/satyajitghana/sd3-ui) |
+| 46   | Hugging face deployment | [Hugging face](https://huggingface.co/) |
+| 47   | Minikube | [Minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Fwindows%2Fx86-64%2Fstable%2F.exe+download) |
+| 48   | Minikube ingress | [Minikube ingress](https://minikube.sigs.k8s.io/docs/handbook/addons/ingress-dns/#Windows) |
+| 49   | Helm | [Helm](https://helm.sh/) |
+| 50   | Nextjs | [Nextjs](https://nextjs.org/) |
+| 51   | Cluster creation with AWS EKS - eksctl | [eksctl](https://eksctl.io/) |
+| 52   | AWS loadbalancers | [AWS loadbalancers ELB](https://aws.amazon.com/elasticloadbalancing/) |
+| 53   | EKS Cluster Autoscaling | [EKS Cluster Autoscaling](https://aws.amazon.com/blogs/containers/deep-dive-on-amazon-ecs-cluster-auto-scaling/) |
+| 54   | Horizontal pod autoscaling HPA | [Horizontal pod autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) |
+| 55   | ISTIO | [ISTIO](https://istio.io/) |
+| 56   | Kiali | [Kiali](https://kiali.io/) |
+| 57   | Prometheus | [Prometheus](https://prometheus.io/download/) |
+| 58   | Grafana | [Grafana](https://grafana.com/) |
+| 59   | Kserve | [Kserve](https://github.com/kserve/kserve/tree/master) |
+| 60   | Metric server | [Metric server](https://kubernetes-sigs.github.io/metrics-server/) |
+| 61   | S3 Integration with Kserve | [Kserve](https://github.com/kserve/kserve/tree/master) |
+| 62   | Canary Deployment with Kserve | [Kserve](https://github.com/kserve/kserve/tree/master) |
+| 63   | ArgoCD | [ArgoCD](https://argoproj.github.io/cd/) |
+| 64   | Knative | [Knative](https://knative.dev/docs/) |
+| 65   | AWS lambda | [AWS lambda](https://aws.amazon.com/lambda/) |
+| 66   | Self hosted runner for EC2 | [machulav/ec2-github-runner](https://github.com/machulav/ec2-github-runner) |
+| 66   | Self hosted runner for EC2 with storage (Refer PR) | [devin-purple/ec2-github-runner](https://github.com/devin-purple/ec2-github-runner/tree/97328aea29a7b1da7f840fd9434b3046dfcc07a9) |
+
+
+
+
