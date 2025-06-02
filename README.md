@@ -101,13 +101,12 @@ Website: [On Development]
 
 **Important tools, method, configs, links**
 
-- [resource file](./resources/) (needs update after session-12)
+- [resource file](./resources/)
 
 
 ## TODO
 
 - Add in bio website with all repo links
-- Update the resources link after session-12
 
 ## Updates
 
