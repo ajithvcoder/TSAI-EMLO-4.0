@@ -1,0 +1,35 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "sports-classifier"
+  annotations:
+    serving.kserve.io/enable-metric-aggregation: "true"
+    serving.kserve.io/enable-prometheus-scraping: "true"
+    autoscaling.knative.dev/minScale: "1"
+    autoscaling.knative.dev/maxScale: "3"
+    autoscaling.knative.dev/metric: "rps"
+    autoscaling.knative.dev/target: "5"
+spec:
+  predictor:
+    minReplicas: 1
+    # maxReplicas: 3
+    # containerConcurrency: 2
+    # canaryTrafficPercent: 30
+    serviceAccountName: s3-read-only
+    pytorch:
+      protocolVersion: v1
+      storageUri: s3://mybucket-emlo-mumbai/kserve-ig/sports-classifier-prod/
+      # storageUri: s3://tsai-emlo/kserve-ig/fakeimagenet-vit/
+      # image: pytorch/torchserve-kfs:0.12.0
+      image: 306093656765.dkr.ecr.ap-south-1.amazonaws.com/model-onnx-server:latest
+      imagePullPolicy: Always
+      resources:
+        requests:
+          cpu: 800m
+          memory: 1.5Gi
+        limits:
+          cpu: 2600m
+          memory: 4Gi
+      env:
+        - name: TS_DISABLE_TOKEN_AUTHORIZATION
+          value: "true"

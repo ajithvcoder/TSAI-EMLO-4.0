@@ -1,0 +1,50 @@
+# @package _global_
+
+# specify here default configuration
+# order of defaults determines the order in which configs override each other
+defaults:
+  - _self_
+  - paths: default
+  - data: default
+  - model: default
+  - callbacks: default
+  - logger: default # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
+  - trainer: default
+
+
+  # debugging config (enable through command line, e.g. `python train.py debug=default)
+  - debug: null
+  
+  
+  # experiment configs allow for version control of specific hyperparameters
+  # e.g. best hyperparameters for given model and datamodule
+  - experiment: null
+
+  - override hydra/sweeper: optuna
+  - override hydra/launcher: joblib
+
+# task name, determines output directory path
+task_name: "training.."
+
+# tags to help you identify your experiments
+# you can overwrite this in experiment configs
+# overwrite from command line with `python train.py tags="[first_tag, second_tag]"`
+tags: ["develop,train"]
+
+
+# set False to skip model training
+train: True
+
+# evaluate on test set, using best model weights achieved during training
+# lightning chooses best weights based on the metric specified in checkpoint callback
+test: True
+
+# simply provide checkpoint path to resume training
+ckpt_path: null
+
+# seed for random number generators in pytorch, numpy and python.random
+seed: 42
+
+# !!! True:: meaning remove old files and add new!! make sure you do backup !!! #
+script: False
+name: ??

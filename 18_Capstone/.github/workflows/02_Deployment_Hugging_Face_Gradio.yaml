@@ -1,0 +1,63 @@
+name: Deployment 02 - Hugging Face Spaces
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install huggingface_hub
+
+      - name: Create .env file with AWS credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" > gradio_deploy/.env
+          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> gradio_deploy/.env
+
+      - name: Deploy to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # List files to ensure we have what we expect
+          ls -la gradio_deploy/
+          
+          # Use the huggingface_hub Python API instead of CLI
+          python -c "
+          from huggingface_hub import HfApi
+          import os
+          import glob
+          
+          api = HfApi()
+          
+          # Get all files from the gradio_deploy directory
+          files = glob.glob('gradio_deploy/**', recursive=True)
+          files = [f for f in files if os.path.isfile(f)]
+          
+          # Print files for debugging
+          print('Files to upload:', files)
+          
+          # Upload each file to the Space
+          for file_path in files:
+            print(f'Uploading {file_path}...')
+            api.upload_file(
+              path_or_fileobj=file_path,
+              path_in_repo=file_path.replace('gradio_deploy/', ''),
+              repo_id='${{ secrets.HF_USERNAME }}/${{ secrets.HF_SPACE_NAME }}',
+              repo_type='space',
+              token='${{ secrets.HF_TOKEN }}'
+            )
+          "

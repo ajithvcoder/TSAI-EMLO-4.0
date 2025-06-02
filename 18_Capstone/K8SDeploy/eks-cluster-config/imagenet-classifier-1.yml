@@ -1,0 +1,27 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "imagenet-classifier-1"
+  annotations:
+    serving.kserve.io/enable-metric-aggregation: "true"
+    serving.kserve.io/enable-prometheus-scraping: "true"
+    autoscaling.knative.dev/target: "1"
+spec:
+  predictor:
+    # minReplicas: 0
+    # maxReplicas: 3
+    # containerConcurrency: 2
+    # canaryTrafficPercent: 30
+    serviceAccountName: s3-read-only
+    pytorch:
+      protocolVersion: v1
+      storageUri: s3://mybucket-emlo-mumbai/kserve-ig/cat-classifier/
+      # storageUri: s3://tsai-emlo/kserve-ig/fakeimagenet-vit/
+      image: pytorch/torchserve-kfs:0.12.0
+      resources:
+        limits:
+          cpu: 5200m
+          memory: 8Gi
+      env:
+        - name: TS_DISABLE_TOKEN_AUTHORIZATION
+          value: "true"

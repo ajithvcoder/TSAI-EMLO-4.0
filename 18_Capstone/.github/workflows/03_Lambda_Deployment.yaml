@@ -1,0 +1,72 @@
+name: Deployment 03 Lambda Deployment with Gradio
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install Python dependencies and CDK
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_ACCOUNT }}
+          CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          cd LambdaFn 
+          python -m pip install --upgrade pip
+          # install your Python dependencies here
+          pip install -r requirements.lambda.txt
+          pip install -r aws-req.txt
+          npm install -g aws-cdk
+          python download_files.py
+
+
+
+      - name: Deploy to AWS Lambda with Gradio
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_ACCOUNT }}
+          CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          pwd
+          cd LambdaFn 
+          pwd
+          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $CDK_DEFAULT_ACCOUNT.dkr.ecr.$CDK_DEFAULT_REGION.amazonaws.com
+          echo "done aws"
+          cdk bootstrap aws://$CDK_DEFAULT_ACCOUNT/$CDK_DEFAULT_REGION --verbose
+          echo "done cdk boot"
+          cdk deploy --require-approval=never --progress=events
+          echo "done cdk deploy"
+          sleep 300
+
+      - name: Destroy stack
+        run: |
+          pwd
+          cd LambdaFn 
+          cdk destroy --force

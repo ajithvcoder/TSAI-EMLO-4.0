@@ -1,0 +1,40 @@
+name: Deployment 01 - Main Trigger Workflow
+
+# on:
+#   pull_request:
+#     types: [opened, synchronize, reopened]
+
+on:
+  workflow_dispatch:
+
+# on:
+#   push:
+#     branches:
+#       - dev_1
+
+jobs:
+  trigger-train:
+    uses: ./.github/workflows/01A_Deployment_Train_And_Store.yaml
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ECR_LOGIN_URI: ${{ secrets.AWS_ECR_LOGIN_URI }}
+      ECR_REPOSITORY_NAME: ${{ secrets.ECR_REPOSITORY_NAME }}
+      AWS_SECURITY_GROUP_ID: ${{ secrets.AWS_SECURITY_GROUP_ID }}
+      AWS_SUBNET_ID_1: ${{ secrets.AWS_SUBNET_ID_1 }}
+      PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+
+  trigger-deploy:
+    needs: trigger-train
+    uses: ./.github/workflows/01B_Deployment_ArgoCD_And_Promote.yaml
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ECR_LOGIN_URI: ${{ secrets.AWS_ECR_LOGIN_URI }}
+      ECR_REPOSITORY_NAME: ${{ secrets.ECR_REPOSITORY_NAME }}
+      AWS_SECURITY_GROUP_ID: ${{ secrets.AWS_SECURITY_GROUP_ID }}
+      AWS_SUBNET_ID_1: ${{ secrets.AWS_SUBNET_ID_1 }}
+      PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}

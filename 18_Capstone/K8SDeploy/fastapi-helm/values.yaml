@@ -1,0 +1,55 @@
+# Environment Settings
+namespace: default
+environment: default
+hostname: fastapi.localhost
+modelName: "fastapi-mamba-model"
+
+# Config Versions
+configVersions:
+  webServer: v1
+  modelServer: v1
+  uiServer: v1
+  # redis: v1
+
+# UI Server Next JS
+modelServer:
+  image:
+    repository: 306093656765.dkr.ecr.ap-south-1.amazonaws.com/a18/model-server
+    tag: latest
+  resources:
+      limits:
+          cpu: "8"
+          memory: 16Gi
+
+# UI Server Next JS
+uiServer:
+  image:
+    repository: 306093656765.dkr.ecr.ap-south-1.amazonaws.com/a18/ui-server
+    tag: latest
+
+# Web Server
+webServer:
+  image:
+    repository: 306093656765.dkr.ecr.ap-south-1.amazonaws.com/a18/web-server
+    tag: latest
+    
+
+# Model Server
+# modelServer:
+#   image:
+#     repository: registry-1.docker.io/pytorch/torchserve-kfs
+#     tag: 0.12.0-gpu
+#   resources:
+#       limits:
+#           cpu: "8"
+#           memory: 16Gi
+
+# Redis
+# redis:
+#   image:
+#     repository: redis
+#     tag: 7.4.1
+#   resources:
+#     memory: "200Mi"
+#     cpu: "200m"
+#   password: "default-password"

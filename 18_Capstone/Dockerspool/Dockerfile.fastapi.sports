@@ -1,0 +1,7 @@
+FROM python:3.12.0-bullseye
+# RUN apt update -y 
+COPY requirements.cpu.txt .
+RUN  apt update -y && pip install -r requirements.cpu.txt
+
+WORKDIR /home/project
+COPY ../ .

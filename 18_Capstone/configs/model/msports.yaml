@@ -1,0 +1,74 @@
+_target_: "src.backend.torch_local.models.msports.LitSportModel"
+in_chans: 3
+num_classes: 100
+global_pool: avg
+depths: 
+  - 2
+  - 2
+  - 6
+  - 2
+
+dims:
+  - 24
+  - 48
+  - 96
+  - 176
+
+heads:
+  - 2
+  - 3
+  - 6
+  - 6
+
+global_block_counts:
+  - 0
+  - 1
+  - 1
+  - 1
+
+kernel_sizes:
+  - 3
+  - 3
+  - 3
+  - 3
+
+d2_scales:
+  - 2
+  - 2
+  - 3 
+  - 4
+
+use_pos_emb:
+  - False
+  - True 
+  - false
+  - false
+
+ls_init_value : 1e-6
+head_init_scale : 1.
+expand_ratio : 4
+downsample_block : True     # true
+conv_bias : True             # false
+stem_type : 'overlap'          # overlap
+head_norm_first : False
+act_layer : gelu
+drop_path_rate : 0.01
+drop_rate : 0.01
+
+
+# patch_size: 14
+# img_size: 224
+# qkv_bias:  False
+# drop_path_rate: 0.03
+# embed_dim: 32
+# num_heads: 16
+# mlp_ratio: 4
+# init_values: 0.1
+# qk_normalization: True
+# depth: 2
+# layerscale_force_fp32: False
+# cls_target: cls_patch_concat  # attention_pooling
+# norm_type: 'rms'              # ln
+
+lr: 1e-3
+weight_decay: 1e-5

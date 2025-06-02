@@ -1,0 +1,7 @@
+onnx
+onnxruntime
+onnxruntime-genai
+numpy
+pillow
+scipy
+torchvision

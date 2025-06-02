@@ -1,0 +1,47 @@
+_target_: "src.backend.torch_local.models.mvegfruits.LitVegFruitsModel"
+
+
+# Model parameters
+base_model: convnext_tiny
+num_classes: 36
+# pretrained: False
+
+depths: (3, 3, 9, 3)      # Deeper layers for hierarchical feature learning
+dims: (96, 192, 384, 768) # Default for ConvNeXt-Tiny
+patch_size: 4             # Smaller patch sizes preserve more spatial detail early on
+pretrained: True          # Crucial if you're training on limited data
+embed_dim: 96
+# depths: (1, 1, 2, 1)
+# dims: (4, 8, 8, 16)
+# patch_size: 8
+
+# Optimizer parameters
+lr: 1e-3
+weight_decay: 1e-5
+
+# Scheduler parameters
+factor: 0.1
+patience: 10
+min_lr: 1e-6
+
+# dims: 
+#   - 3
+#   - 6
+#   - 12
+#   - 18
+  
+# depths: 
+#   - 1
+#   - 1
+#   - 1
+#   - 1
+# head_fn: 'default'
+# conv_ratio: 1.
+# in_chans: 3
+
+
+
+# pretrained: false  # always 
+# model_name: 'Mamba'   # stick to mamba based models
+# lr: 1e-3
+# weight_decay: 1e-5

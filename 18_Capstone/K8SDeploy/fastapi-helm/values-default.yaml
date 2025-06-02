@@ -1,0 +1,5 @@
+namespace: default
+environment: default
+hostname: fastapi.default
+# redis:
+#   password: "prod-redis-password"

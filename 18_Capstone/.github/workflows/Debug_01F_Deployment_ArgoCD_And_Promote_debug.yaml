@@ -1,0 +1,220 @@
+name: Z Debug Deployment 01F - Main - Argo CD Deploy and Promote
+
+# on:
+#   workflow_call:
+#     secrets:
+#       AWS_ACCESS_KEY_ID:
+#         required: true
+#       AWS_SECRET_ACCESS_KEY:
+#         required: true
+#       AWS_REGION:
+#         required: true
+#       AWS_ECR_LOGIN_URI:
+#         required: true
+#       ECR_REPOSITORY_NAME:
+#         required: true
+#       AWS_SECURITY_GROUP_ID:
+#         required: true
+#       AWS_SUBNET_ID_1:
+#         required: true
+#       PERSONAL_ACCESS_TOKEN:
+#         required: true
+
+# # When to run this workflow
+on:
+  workflow_dispatch:  # Manual trigger from GitHub UI
+#   # Uncomment to enable automatic triggers
+#   # push:
+#   #   branches: [ main ]
+#   # pull_request:
+#   #   branches: [ main ]
+
+# Environment variables used across jobs
+env:
+  # ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  # S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
+  # S3_DATA_PATH: data/                #data/files/md5 
+
+jobs:
+  #----------------------------------------
+  # JOB 1: Launch EC2 runner instance - CPU instance for setuping cluster environments
+  #----------------------------------------
+  launch-runner:
+    name: 🚀 Launch EC2 Runner
+    runs-on: ubuntu-latest
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+      commit_id: ${{ steps.get_commit_id_runner.outputs.commit_id }}
+      
+    env:
+      TF_LOG: DEBUG
+      CML_VERBOSE: true 
+      
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Display the commit ID
+        run: |
+          echo "Latest commit ID is: ${{ needs.build-and-push-ecr-image.outputs.commit_id }}"
+
+      - name: Get latest commit ID
+        id: get_commit_id_runner
+        run: |
+          echo "commit_id=${{ needs.build-and-push-ecr-image.outputs.commit_id }}" >> $GITHUB_OUTPUT
+      
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2.3.9
+        with:
+          mode: start
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          # AMI with CUDA/GPU drivers
+          # ec2-image-id: ami-01654480b8a1994bd
+          # ec2-instance-type: g4dn.xlarge
+
+          # AMI with CPU only
+          # ec2-image-id: ami-0e35ddab05955cf57
+          ec2-image-id: ami-01654480b8a1994bd
+          ec2-instance-type: t3a.xlarge
+          subnet-id: ${{ secrets.AWS_SUBNET_ID_1 }}
+          security-group-id: ${{ secrets.AWS_SECURITY_GROUP_ID }}
+          market-type: "spot"
+
+  #----------------------------------------
+  # JOB 2: Train model and deploy
+  #----------------------------------------
+  do-the-job:
+    name: Cluster Setup - Argo CD Deployment - Prompte Model
+    needs: [launch-runner]
+    runs-on: ${{ needs.launch-runner.outputs.label }}
+    outputs:
+      commit_id: ${{ steps.get_commit_id_ec2.outputs.commit_id }}
+    timeout-minutes: 60
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup installations
+        env:
+          REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          CML_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          pwd
+
+          # Assumed git actions checks out the repo and gets inside it
+          cd K8SDeploy/eks-cluster-config
+
+          # node for cml comment
+          curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          npm install -g @dvcorg/cml
+
+      - name: Get path
+        run: |
+          pwd
+
+      # 2. Checkout Repo ArgoCD (separate folder)
+      # https://github.com/ajithvcoder/emlo4-session-18-ajithvcoder-canary-argocd-kserve.git
+      - name: Checkout Repo ArgoCD
+        uses: actions/checkout@v4
+        with:
+          repository: ajithvcoder/emlo4-session-18-ajithvcoder-canary-argocd-kserve
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # PAT with write access to Repo B
+          path: emlo4-session-18-ajithvcoder-canary-argocd-kserve
+
+      - name: Model 1 - Run test and promote if >90% success
+        working-directory: emlo4-session-18-ajithvcoder-canary-argocd-kserve
+        continue-on-error: true
+        run: |
+
+          pwd
+
+          ls -la
+
+          curl -L https://www.python.org/static/apple-touch-icon-144x144-precomposed.png -o downloaded-image_1.png
+
+          echo "Hi this is a test comment 1" >> report.md
+
+
+      - name: Model 2 - Run test and promote if >90% success
+        working-directory: emlo4-session-18-ajithvcoder-canary-argocd-kserve
+        continue-on-error: true
+        run: |
+
+          curl -L https://www.python.org/static/apple-touch-icon-144x144-precomposed.png -o downloaded-image_2.png
+
+          echo "Hi this is a test comment 2" >> report.md
+
+          cp report.md ../
+
+      - name: CML Comment
+        env:
+          REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          CML_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          pwd
+
+          ls -la
+          echo "Veg fruits" >> report.md
+          # img_url=$(cml publish emlo4-session-18-ajithvcoder-canary-argocd-kserve/downloaded-image_1.png)
+          echo "![VegFruits Results](emlo4-session-18-ajithvcoder-canary-argocd-kserve/downloaded-image_1.png)" >> report.md
+          echo "Sports" >> report.md
+          # img_url=$(cml publish emlo4-session-18-ajithvcoder-canary-argocd-kserve/downloaded-image_2.png)
+          echo "![Sports Results](emlo4-session-18-ajithvcoder-canary-argocd-kserve/downloaded-image_2.png)" >> report.md
+
+          cml comment create report.md 
+
+
+      - name: Delete Entire Stack
+        continue-on-error: true
+        run: |
+          # get inside the dir
+          cd K8SDeploy/eks-cluster-config || true
+
+          # delete cluster
+          # eksctl delete cluster -f eks-cluster.yaml --disable-nodegroup-eviction
+
+  #----------------------------------------
+  # JOB 3: Stop EC2 runner after completion
+  #----------------------------------------
+  stop-runner:
+    name: Stop self-hosted EC2 runner
+    needs:
+      - launch-runner
+      - do-the-job
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
+      - name: Stop EC2 runner
+        uses: machulav/ec2-github-runner@v2.3.9
+        with:
+          mode: stop
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.launch-runner.outputs.label }}
+          ec2-instance-id: ${{ needs.launch-runner.outputs.ec2-instance-id }}
+

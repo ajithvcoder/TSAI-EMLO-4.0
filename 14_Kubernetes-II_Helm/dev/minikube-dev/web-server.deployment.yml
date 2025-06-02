@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+  labels:
+    app: web-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-server
+  template:
+    metadata:
+      labels:
+        app: web-server
+    spec:
+      containers:
+      - name: web-server
+        image: web-server:latest
+        imagePullPolicy: Never
+        resources:
+          requests:
+            memory: "300Mi"     # Increased for dev environment
+            cpu: "400m"         # Base CPU request
+          limits:
+            memory: "600Mi"
+            cpu: "500m"
+        ports:
+          - containerPort: 80
+        env:
+          # normal config map
+          # - name: REDIS_HOST
+          #   value: redis-db-service
+          # - name: REDIS_PORT
+          #   value: "6379"
+          # - name: REDIS_PASSWORD
+          #   value: aiwilltakeovertheworld
+          # - name: MODEL_SERVER_URL
+          #   value: "http://model-server-service"
+
+          # use config.cm fromc config file
+          - name: REDIS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: redis-config
+                key: hostname
+          - name: REDIS_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: redis-config
+                key: port
+          - name: MODEL_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: model-server-config
+                key: model_server_url
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: redis-secret
+                key: db_password

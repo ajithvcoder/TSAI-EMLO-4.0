@@ -1,0 +1,20 @@
+stages:
+  train_sports:
+    cmd: python src/backend/torch_local/train.py experiment=hsports script=true
+    desc: "Train sports classification model"
+    deps:
+      - src/backend/torch_local/train.py
+   
+  train_vegfruits:
+    cmd: python src/backend/torch_local/train.py experiment=hvegfruits script=true
+    desc: "Train vegetables and fruits classification model"
+    deps:
+      - src/backend/torch_local/train.py
+
+  # transfer_to_s3:
+  #   cmd: python src/backend/torch_local/transfer_mar.py
+  #   desc: "Train and veg fruits"
+  #   deps:
+  #     - src/backend/torch_local/transfer_mar.py
+      
+

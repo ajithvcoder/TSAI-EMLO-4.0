@@ -1,0 +1,10 @@
+FROM pytorch/torchserve-kfs:0.12.0
+
+USER root
+WORKDIR /home/model-server
+
+COPY requirements-onnx.txt .
+
+RUN pip install -r requirements-onnx.txt && rm -rf /root/.cache/pip
+
+ENTRYPOINT ["/usr/local/bin/dockerd-entrypoint.sh"]

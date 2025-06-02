@@ -1,0 +1,804 @@
+name: Z Debug - Project 01 - Kubernetes Deployment
+
+
+# When to run this workflow
+on:
+  workflow_dispatch:  # Manual trigger from GitHub UI
+  # Uncomment to enable automatic triggers
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
+
+# Environment variables used across jobs
+env:
+  # ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  # S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
+  # S3_DATA_PATH: data/                #data/files/md5 
+
+jobs:
+  #----------------------------------------
+  # JOB 1: Build and push Docker image to ECR
+  #----------------------------------------
+  build-and-push-ecr-image:
+    name: 📦 Build and Push Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      commit_id: ${{ steps.get_commit_id.outputs.commit_id }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Utilities
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq unzip
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # - name: Login to Amazon ECR
+      #   id: login-ecr
+      #   uses: aws-actions/amazon-ecr-login@v2
+      #   with:
+      #     mask-password: 'false'
+
+      - name: Get Latest Commit ID
+        id: get_commit_id
+        run: |
+          latest_commit=$(git rev-parse HEAD)
+          echo "commit_id=$latest_commit" >> $GITHUB_OUTPUT
+      
+      - name: Display the commit ID        
+        run: |
+          echo "Latest commit ID is: ${{ steps.get_commit_id.outputs.commit_id }}"
+      
+      # - name: Build and Push Docker Image
+      #   id: build-image
+      #   env:
+      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     IMAGE_TAG: latest
+      #   run: |
+      #     # Build development container image and push to ECR
+      #     echo "Building and pushing image to $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+      #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      #     echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+
+
+  #----------------------------------------
+  # JOB 2: Launch EC2 instance with GPU for training
+  #----------------------------------------
+  launch-runner:
+    name: 🚀 Launch EC2 GPU Runner
+    runs-on: ubuntu-latest
+    needs: build-and-push-ecr-image
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+      commit_id: ${{ steps.get_commit_id_runner.outputs.commit_id }}
+      
+    env:
+      TF_LOG: DEBUG
+      CML_VERBOSE: true 
+      
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Display the commit ID
+        run: |
+          echo "Latest commit ID is: ${{ needs.build-and-push-ecr-image.outputs.commit_id }}"
+
+      - name: Get latest commit ID
+        id: get_commit_id_runner
+        run: |
+          echo "commit_id=${{ needs.build-and-push-ecr-image.outputs.commit_id }}" >> $GITHUB_OUTPUT
+      
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2.3.9
+        with:
+          mode: start
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          # AMI with CUDA/GPU drivers
+          # ec2-image-id: ami-01654480b8a1994bd
+          # ec2-instance-type: g4dn.xlarge
+
+          # AMI with CPU only
+          # ec2-image-id: ami-0e35ddab05955cf57
+          ec2-image-id: ami-01654480b8a1994bd
+          ec2-instance-type: t3a.xlarge
+          subnet-id: ${{ secrets.AWS_SUBNET_ID_1 }}
+          security-group-id: ${{ secrets.AWS_SECURITY_GROUP_ID }}
+          market-type: "spot"
+
+  #----------------------------------------
+  # JOB 3: Train model and deploy
+  #----------------------------------------
+  do-the-job:
+    name: Train Models and Deploy
+    needs: [launch-runner, build-and-push-ecr-image]
+    runs-on: ${{ needs.launch-runner.outputs.label }}
+    outputs:
+      commit_id: ${{ steps.get_commit_id_ec2.outputs.commit_id }}
+    timeout-minutes: 60
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # - name: Install requirements
+      #   run: |
+      #     pip install -r requirements.cpu.txt
+      #     pip install pyopenssl --upgrade
+
+      # un comment after debugging
+      # - name: Setup dvc
+      #   run: |
+      #     dvc pull -r myremote
+
+      # - name: Setup dvc
+      #   run: |
+      #     dvc repro
+
+      - name: Get Commit ID
+        id: get_commit_id_ec2
+        run: |
+          echo "commit_id=${{ needs.launch-runner.outputs.commit_id }}" >> $GITHUB_OUTPUT
+
+
+
+      # 3. Modify files in Repo ArgoCD
+      # - name: Make changes in Repo ArgoCD
+      #   run: |
+      #     echo "Updated by workflow in Repo A at $(date)" >> emlo4-session-18-ajithvcoder-canary-argocd-kserve/updates.log
+
+
+      - name: Setup installations
+        run: |
+          # Assumed git actions checks out the repo and gets inside it
+          cd K8SDeploy/eks-cluster-config
+
+          # EKSCTL
+          curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz"
+
+          tar -xzf eksctl_Linux_amd64.tar.gz -C /tmp && rm eksctl_Linux_amd64.tar.gz
+          sudo mv /tmp/eksctl /usr/local/bin
+
+          # AWS-EKS
+          curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.32.0/2024-12-20/bin/linux/amd64/kubectl
+          chmod +x ./kubectl
+          mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+
+          # Docker
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sudo sh get-docker.sh
+
+          # AWS
+          # curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          # unzip awscliv2.zip
+          # sudo ./aws/install
+
+          # Helm
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
+
+          # ArgoCD
+          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+          # rm argocd-linux-amd64
+
+
+      - name: Setup Cluster
+        continue-on-error: true
+        run: |
+          # Inference setup
+          # ssh needed for eksctl to setup cluster config
+          yes | ssh-keygen -t rsa -f ~/.ssh/id_rsa  -N ""
+
+          # ls ssh place
+          ls ~/.ssh/
+
+          # ls current folder
+          ls -la
+
+
+          # get inside the dir
+          cd K8SDeploy/eks-cluster-config || true
+          eksctl create cluster -f eks-cluster.yaml
+
+
+      - name: Configure AWS manually
+        run: |
+          sudo mkdir -p ~/.aws
+          echo "[default]" | sudo tee ~/.aws/credentials
+          echo "aws_access_key_id = $AWS_ACCESS_KEY_ID" | sudo tee -a ~/.aws/credentials
+          echo "aws_secret_access_key = $AWS_SECRET_ACCESS_KEY" | sudo tee -a ~/.aws/credentials
+          echo "[default]" | sudo tee ~/.aws/config
+          echo "region = ap-south-1" | sudo tee -a ~/.aws/config
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ap-south-1
+
+      - name: Configure AWS as root
+        run: |
+          sudo mkdir -p /root/.aws
+          echo "[default]" | sudo tee /root/.aws/credentials
+          echo "aws_access_key_id = $AWS_ACCESS_KEY_ID" | sudo tee -a /root/.aws/credentials
+          echo "aws_secret_access_key = $AWS_SECRET_ACCESS_KEY" | sudo tee -a /root/.aws/credentials
+
+          echo "[default]" | sudo tee /root/.aws/config
+          echo "region = ap-south-1" | sudo tee -a /root/.aws/config
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Configure kubectl
+        continue-on-error: true
+        run: aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+
+      - name: Kubernetes Setup
+        continue-on-error: true
+        run: |        
+          # get inside the dir
+          cd K8SDeploy/eks-cluster-config || true
+          aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+
+          kubectl delete -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml --validate=false || true
+          sleep 5
+          kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml || true
+
+          sleep 5
+          kubectl patch deployment metrics-server -n kube-system --type='json' -p='[
+            {
+              "op": "add",
+              "path": "/spec/template/spec/hostNetwork",
+              "value": true
+            },
+            {
+              "op": "replace",
+              "path": "/spec/template/spec/containers/0/args",
+              "value": [
+                "--cert-dir=/tmp",
+                "--secure-port=4443",
+                "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname",
+                "--kubelet-use-node-status-port",
+                "--metric-resolution=15s",
+                "--kubelet-insecure-tls"
+              ]
+            },
+            {
+              "op": "replace",
+              "path": "/spec/template/spec/containers/0/ports/0/containerPort",
+              "value": 4443
+            }
+          ]'
+
+          #### KNative
+
+          kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.16.0/serving-crds.yaml
+          sleep 5
+          kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.16.0/serving-core.yaml
+
+          # Pause
+          sleep 20
+
+          #### ISTIO
+
+          kubectl apply -f https://github.com/knative/net-istio/releases/download/knative-v1.16.0/istio.yaml
+          sleep 5
+          kubectl apply -f https://github.com/knative/net-istio/releases/download/knative-v1.16.0/net-istio.yaml
+
+          # Pause
+          sleep 20
+
+          kubectl patch configmap/config-domain \
+                --namespace knative-serving \
+                --type merge \
+                --patch '{"data":{"emlo.tsai":""}}'
+          sleep 5
+          kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.16.0/serving-hpa.yaml
+          sleep 5
+          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.2/cert-manager.yaml
+          sleep 5
+          # Pause
+          sleep 20
+
+      - name: KNative Serving
+        continue-on-error: true
+        run: |  
+          # get inside the dir
+          cd K8SDeploy/eks-cluster-config || true
+          aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+
+          #### Knative serving
+
+          kubectl get all -n cert-manager
+
+          kubectl apply --server-side -f https://github.com/kserve/kserve/releases/download/v0.14.1/kserve.yaml
+
+          # Pause
+          sleep 30
+
+          kubectl get all -n kserve
+
+          # Pause
+          sleep 10
+
+          kubectl get all -n kserve
+
+          # Pause
+          sleep 10
+
+          kubectl get all -n kserve
+
+          kubectl apply --server-side -f https://github.com/kserve/kserve/releases/download/v0.14.1/kserve-cluster-resources.yaml
+
+          # Pause
+          sleep 30
+
+          eksctl create iamserviceaccount --cluster=basic-cluster-8 --name=s3-read-only --attach-policy-arn=arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess  --override-existing-serviceaccounts --region ap-south-1 --approve
+
+          # Pause
+          sleep 3
+
+          kubectl apply -f s3-secret.yaml
+          # Pause
+          sleep 10
+          kubectl patch serviceaccount s3-read-only -p '{"secrets": [{"name": "s3-secret"}]}'
+
+          # Pause
+          sleep 10
+
+      - name: Dashboard, ALB, Charts
+        continue-on-error: true
+        run: |
+          aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+          # get inside the dir
+          cd K8SDeploy/eks-cluster-config || true
+
+          # Kubernetes Dashboard
+          helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+          helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+          sleep 3
+          kubectl label namespace default istio-injection=enabled
+          sleep 5
+          # ALB
+          eksctl create iamserviceaccount \
+              --cluster=basic-cluster-8 \
+              --namespace=kube-system \
+              --name=aws-load-balancer-controller \
+              --attach-policy-arn=arn:aws:iam::306093656765:policy/AWSLoadBalancerControllerIAMPolicy \
+              --override-existing-serviceaccounts \
+              --region ap-south-1 \
+              --approve
+
+          # EKS Charts
+          helm repo add eks https://aws.github.io/eks-charts
+          helm repo update
+          sleep 5
+          helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=basic-cluster-8 --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller
+
+      - name: Load URL
+        id: get-url
+        continue-on-error: true
+        run: |
+
+          aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+          # get inside the dir
+          cd K8SDeploy/eks-cluster-config || true
+          sleep 20
+          kubectl get pods,svc -n istio-system
+
+          url=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          # url=a28873898792898292782787387387-269881018.ap-south-1.elb.amazonaws.com
+          echo "url=$url" >> $GITHUB_OUTPUT
+          sleep 5
+
+      - name: Configure kubectl
+        continue-on-error: true
+        run: aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+
+      - name: Prometheus
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          # Verify AWS credentials are working
+          aws sts get-caller-identity || true
+
+          # Explicitly set KUBECONFIG to ensure we're using the right config
+          export KUBECONFIG=/root/.kube/config
+          
+          # Update kubeconfig and force it to write to the file
+          aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8 --kubeconfig $KUBECONFIG || true
+
+          # Verify the config has the correct server
+          kubectl config view --minify | grep server
+          
+          # Wait until the EKS API server is reachable
+          for i in {1..15}; do
+            if kubectl get nodes; then
+              echo "EKS cluster is ready."
+              break
+            fi
+            echo "Waiting for EKS API server..."
+            sleep 10
+          done
+
+          # Get cluster endpoint
+          CLUSTER_ENDPOINT=$(aws eks describe-cluster --name basic-cluster-8 --region ap-south-1 --query "cluster.endpoint" --output text)
+          echo "Cluster endpoint: $CLUSTER_ENDPOINT"
+          
+          # Update kubeconfig with explicit server
+          aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+          
+          # Manually verify/patch the config if needed
+          kubectl config set-cluster basic-cluster-8 --server=$CLUSTER_ENDPOINT
+
+          cat ~/.kube/config || true
+
+          cat /root/.kube/config || true
+
+          # check 1
+          kubectl get nodes
+          # get inside the dir
+          cd K8SDeploy/eks-cluster-config || true
+
+          # Ensure git is installed
+          if ! command -v git &> /dev/null; then
+            echo "Git not found. Installing..."
+            sudo apt-get update && sudo apt-get install -y git
+          fi
+          sleep 5
+          cd other-setup
+          git clone --branch release-0.14 https://github.com/kserve/kserve.git
+          sleep 5
+          cd kserve
+          sleep 5
+          kubectl apply -k docs/samples/metrics-and-monitoring/prometheus-operator  --validate=false
+          sleep 20
+          kubectl wait --for condition=established --timeout=120s crd/prometheuses.monitoring.coreos.com
+          sleep 20
+          kubectl wait --for condition=established --timeout=120s crd/servicemonitors.monitoring.coreos.com
+          sleep 20
+          kubectl apply -k docs/samples/metrics-and-monitoring/prometheus  --validate=false
+          sleep 10
+
+          cd ..
+          kubectl patch configmaps -n knative-serving config-deployment --patch-file qpext_image_patch.yaml
+          sleep 10
+
+      - name: Grafana
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+          # get inside the dir
+          cd K8SDeploy/eks-cluster-config || true
+          sleep 5
+          kubectl create namespace grafana
+          sleep 2
+          helm repo add grafana https://grafana.github.io/helm-charts
+          sleep 5
+          helm repo update
+          helm install grafana grafana/grafana --namespace grafana --version 8.8.4
+          sleep 5
+          kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+
+      # - name: Inference imagenet
+      #   continue-on-error: true
+      #   id: get-url
+      #   run: |
+      #     # get inside the dir
+      #     cd K8SDeploy/eks-cluster-config || true
+
+      #     # kubectl apply -f sports-classifier.yml
+      #     # Pause
+      #     sleep 15
+
+      #     kubectl get isvc
+
+      #     kubectl get svc -n istio-system
+
+      #     # Pause
+      #     sleep 25
+
+      #     kubectl get isvc
+
+      #     kubectl get svc -n istio-system
+
+      #     sleep 30
+
+      #     # TODO: Fetch the url and commit it to the argocd repo
+      #     # use -dev for s3
+      #     # Do load test and test it
+      #     # if success push to prod
+
+      #     # kubectl delete -f sports-classifier.yml
+
+      #     url=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+      #     # url=a28873898792898292782787387387-269881018.ap-south-1.elb.amazonaws.com
+      #     echo "url=$url" >> $GITHUB_OUTPUT
+
+      # - name: Get LoadBalancer URL
+      #   id: get-url
+      #   run: |
+      #     url=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+      #     # url=a28873898792898292782787387387-269881018.ap-south-1.elb.amazonaws.com
+      #     echo "url=$url" >> $GITHUB_OUTPUT
+
+      # 2. Checkout Repo ArgoCD (separate folder)
+      # https://github.com/ajithvcoder/emlo4-session-18-ajithvcoder-canary-argocd-kserve.git
+      - name: Checkout Repo ArgoCD
+        uses: actions/checkout@v4
+        with:
+          repository: ajithvcoder/emlo4-session-18-ajithvcoder-canary-argocd-kserve
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # PAT with write access to Repo B
+          path: emlo4-session-18-ajithvcoder-canary-argocd-kserve
+
+      - name: Replace any AWS ELB URL in model-server.cm.yml
+        run: |
+          new_url="${{ steps.get-url.outputs.url }}"
+          file="emlo4-session-18-ajithvcoder-canary-argocd-kserve/fastapi-helm/templates/model-server.cm.yml"
+          # Replace any http://*.elb.amazonaws.com with the new URL
+          sed -E -i "s|http://[a-z0-9.-]+\.elb\.amazonaws\.com|http://$new_url|g" "$file"
+
+      # 4. Commit & push changes to Repo B
+      - name: Commit & push to Repo B
+        working-directory: emlo4-session-18-ajithvcoder-canary-argocd-kserve
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # git add emlo4-session-18-ajithvcoder-canary-argocd-kserve/fastapi-helm/templates/model-server.cm.yml
+
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Update from Repo A via GitHub Actions"
+            git push
+          fi
+          sleep 10
+
+      - name: Configure kubectl
+        continue-on-error: true
+        run: aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+
+      - name: ArgoCD Setup
+        continue-on-error: true
+        run: |
+          export HOME=/root 
+          aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+          # get inside the dir
+          cd K8SDeploy/eks-cluster-config || true
+          sleep 5
+          kubectl create namespace argocd
+          sleep 20
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+          sleep 20
+          argocd admin initial-password -n argocd
+
+
+      - name: Create s3-secret.yaml
+        working-directory: emlo4-session-18-ajithvcoder-canary-argocd-kserve
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          # mkdir -p argo-apps
+          python3 utils/generate_s3_secret.py
+          sleep 5
+          ls argo-apps
+
+      - name: Configure AWS manually
+        run: |
+          sudo mkdir -p ~/.aws
+          echo "[default]" | sudo tee ~/.aws/credentials
+          echo "aws_access_key_id = $AWS_ACCESS_KEY_ID" | sudo tee -a ~/.aws/credentials
+          echo "aws_secret_access_key = $AWS_SECRET_ACCESS_KEY" | sudo tee -a ~/.aws/credentials
+          echo "[default]" | sudo tee ~/.aws/config
+          echo "region = ap-south-1" | sudo tee -a ~/.aws/config
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Configure AWS as root
+        run: |
+          sudo mkdir -p /root/.aws
+          echo "[default]" | sudo tee /root/.aws/credentials
+          echo "aws_access_key_id = $AWS_ACCESS_KEY_ID" | sudo tee -a /root/.aws/credentials
+          echo "aws_secret_access_key = $AWS_SECRET_ACCESS_KEY" | sudo tee -a /root/.aws/credentials
+
+          echo "[default]" | sudo tee /root/.aws/config
+          echo "region = ap-south-1" | sudo tee -a /root/.aws/config
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Configure kubectl
+        continue-on-error: true
+        run: aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+
+      - name: ArgoCD Deployment
+        # working-directory: emlo4-session-18-ajithvcoder-canary-argocd-kserve
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+
+          cd emlo4-session-18-ajithvcoder-canary-argocd-kserve
+          ls argo-apps
+          sleep 5
+
+          # Verify AWS credentials are working
+          aws sts get-caller-identity || true
+
+          # Explicitly set KUBECONFIG to ensure we're using the right config
+          export KUBECONFIG=/root/.kube/config
+          
+          # Update kubeconfig and force it to write to the file
+          aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8 --kubeconfig $KUBECONFIG || true
+
+          # Verify the config has the correct server
+          kubectl config view --minify | grep server
+          
+          # Wait until the EKS API server is reachable
+          for i in {1..15}; do
+            if kubectl get nodes; then
+              echo "EKS cluster is ready."
+              break
+            fi
+            echo "Waiting for EKS API server..."
+            sleep 10
+          done
+
+          # Get cluster endpoint
+          CLUSTER_ENDPOINT=$(aws eks describe-cluster --name basic-cluster-8 --region ap-south-1 --query "cluster.endpoint" --output text)
+          echo "Cluster endpoint: $CLUSTER_ENDPOINT"
+          
+          # Update kubeconfig with explicit server
+          aws eks update-kubeconfig --region ap-south-1 --name basic-cluster-8
+          
+          # Manually verify/patch the config if needed
+          kubectl config set-cluster basic-cluster-8 --server=$CLUSTER_ENDPOINT
+
+          new_url="${{ steps.get-url.outputs.url }}"
+          echo "Deploying with model URL: http://${new_url}/v1/models/vegfruits-classifier:predict"
+
+          kubectl apply -f argo-apps --validate=false
+          sleep 200
+
+          kubectl get pods
+
+          sleep 200
+
+          kubectl get pods
+
+
+      - name: Model 1 - Run test and promote if >90% success
+        working-directory: emlo4-session-18-ajithvcoder-canary-argocd-kserve
+        continue-on-error: true
+        run: |
+          pip install matplotlib
+          # Run test and capture output
+          output=$(python3 utils/test_load_vegfruits_2.py --url "http://${{ steps.get-url.outputs.url }}/v1/models/vegfruits-classifier:predict" --requests 10 --workers 2)
+          
+          echo "$output"
+          
+          # Extract total and successful requests
+          total=$(echo "$output" | grep "Total requests:" | awk '{print $3}')
+          success=$(echo "$output" | grep "Successful requests:" | awk '{print $3}')
+
+          echo "Total: $total, Successful: $success"
+
+          if [ "$total" -gt 0 ]; then
+            percent=$(( success * 100 / total ))
+            echo "Success rate: ${percent}%"
+
+            if [ "$percent" -ge 90 ]; then
+              echo "✅ Success rate is above 90%, syncing to production S3..."
+              aws s3 cp --recursive s3://mybucket-emlo-mumbai/kserve-ig/vegfruits-classifier-dummy/ s3://mybucket-emlo-mumbai/kserve-ig/vegfruits-classifier-prod/
+            else
+              echo "❌ Success rate is below 90%, skipping promotion."
+            fi
+          else
+            echo "⚠️ No requests processed, skipping promotion."
+          fi
+          sleep 30
+
+      - name: Model 2 - Run test and promote if >90% success
+        working-directory: emlo4-session-18-ajithvcoder-canary-argocd-kserve
+        continue-on-error: true
+        run: |
+          pip install matplotlib
+          # Run test and capture output
+          output=$(python3 utils/test_load_sports_2.py --url "http://${{ steps.get-url.outputs.url }}/v1/models/sports-classifier:predict" --requests 10 --workers 2)
+          
+          echo "$output"
+          
+          # Extract total and successful requests
+          total=$(echo "$output" | grep "Total requests:" | awk '{print $3}')
+          success=$(echo "$output" | grep "Successful requests:" | awk '{print $3}')
+
+          echo "Total: $total, Successful: $success"
+
+          if [ "$total" -gt 0 ]; then
+            percent=$(( success * 100 / total ))
+            echo "Success rate: ${percent}%"
+
+            if [ "$percent" -ge 90 ]; then
+              echo "✅ Success rate is above 90%, syncing to production S3..."
+              aws s3 cp --recursive s3://mybucket-emlo-mumbai/kserve-ig/sports-classifier-dummy/ s3://mybucket-emlo-mumbai/kserve-ig/sports-classifier-prod/
+            else
+              echo "❌ Success rate is below 90%, skipping promotion."
+            fi
+          else
+            echo "⚠️ No requests processed, skipping promotion."
+          fi
+
+      # - name: Delete Entire Stack
+      #   continue-on-error: true
+      #   run: |
+      #     # get inside the dir
+      #     cd K8SDeploy/eks-cluster-config || true
+
+      #     # delete cluster
+      #     # eksctl delete cluster -f eks-cluster.yaml --disable-nodegroup-eviction
+
+  #----------------------------------------
+  # JOB 4: Stop EC2 runner after completion
+  #----------------------------------------
+  # stop-runner:
+  #   name: Stop self-hosted EC2 runner
+  #   needs:
+  #     - launch-runner
+  #     - do-the-job
+  #   runs-on: ubuntu-latest
+  #   if: ${{ always() }}
+  #   steps:
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ secrets.AWS_REGION }}
+          
+  #     - name: Stop EC2 runner
+  #       uses: machulav/ec2-github-runner@v2.3.9
+  #       with:
+  #         mode: stop
+  #         github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  #         label: ${{ needs.launch-runner.outputs.label }}
+  #         ec2-instance-id: ${{ needs.launch-runner.outputs.ec2-instance-id }}

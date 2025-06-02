@@ -1,0 +1,77 @@
+2025-01-24T15:44:59.537450Z	info	FLAG: --concurrency="0"
+2025-01-24T15:44:59.537577Z	info	FLAG: --domain="istio-ingress.svc.cluster.local"
+2025-01-24T15:44:59.537619Z	info	FLAG: --help="false"
+2025-01-24T15:44:59.537656Z	info	FLAG: --log_as_json="false"
+2025-01-24T15:44:59.537692Z	info	FLAG: --log_caller=""
+2025-01-24T15:44:59.537730Z	info	FLAG: --log_output_level="default:info"
+2025-01-24T15:44:59.537830Z	info	FLAG: --log_rotate=""
+2025-01-24T15:44:59.537873Z	info	FLAG: --log_rotate_max_age="30"
+2025-01-24T15:44:59.537909Z	info	FLAG: --log_rotate_max_backups="1000"
+2025-01-24T15:44:59.537948Z	info	FLAG: --log_rotate_max_size="104857600"
+2025-01-24T15:44:59.537988Z	info	FLAG: --log_stacktrace_level="default:none"
+2025-01-24T15:44:59.538047Z	info	FLAG: --log_target="[stdout]"
+2025-01-24T15:44:59.538086Z	info	FLAG: --meshConfig="./etc/istio/config/mesh"
+2025-01-24T15:44:59.538131Z	info	FLAG: --outlierLogPath=""
+2025-01-24T15:44:59.538168Z	info	FLAG: --profiling="true"
+2025-01-24T15:44:59.538204Z	info	FLAG: --proxyComponentLogLevel="misc:error"
+2025-01-24T15:44:59.538245Z	info	FLAG: --proxyLogLevel="warning"
+2025-01-24T15:44:59.538383Z	info	FLAG: --serviceCluster="istio-proxy"
+2025-01-24T15:44:59.538405Z	info	FLAG: --stsPort="0"
+2025-01-24T15:44:59.538412Z	info	FLAG: --templateFile=""
+2025-01-24T15:44:59.538511Z	info	FLAG: --tokenManagerPlugin="GoogleTokenExchange"
+2025-01-24T15:44:59.538537Z	info	FLAG: --vklog="0"
+2025-01-24T15:44:59.538543Z	info	Version 1.20.2-5f5d657c72d30a97cae97938de3a6831583e9f15-Clean
+2025-01-24T15:44:59.541480Z	info	Maximum file descriptors (ulimit -n): 65536
+2025-01-24T15:44:59.541812Z	info	Proxy role	ips=[192.168.13.18] type=router id=istio-ingress-94f46b75b-m9zx9.istio-ingress domain=istio-ingress.svc.cluster.local
+2025-01-24T15:44:59.541972Z	info	Apply proxy config from env {}
+
+2025-01-24T15:44:59.544060Z	info	cpu limit detected as 2, setting concurrency
+2025-01-24T15:44:59.544531Z	info	Effective config: binaryPath: /usr/local/bin/envoy
+concurrency: 2
+configPath: ./etc/istio/proxy
+controlPlaneAuthPolicy: MUTUAL_TLS
+discoveryAddress: istiod.istio-system.svc:15012
+drainDuration: 45s
+proxyAdminPort: 15000
+serviceCluster: istio-proxy
+statNameLength: 189
+statusPort: 15020
+terminationDrainDuration: 5s
+tracing:
+  zipkin:
+    address: zipkin.istio-system:9411
+
+2025-01-24T15:44:59.544602Z	info	JWT policy is third-party-jwt
+2025-01-24T15:44:59.544639Z	info	using credential fetcher of JWT type in cluster.local trust domain
+2025-01-24T15:44:59.547130Z	info	platform detected is AWS
+2025-01-24T15:44:59.551264Z	info	Workload SDS socket not found. Starting Istio SDS Server
+2025-01-24T15:44:59.551308Z	info	CA Endpoint istiod.istio-system.svc:15012, provider Citadel
+2025-01-24T15:44:59.551596Z	info	Using CA istiod.istio-system.svc:15012 cert with certs: var/run/secrets/istio/root-cert.pem
+2025-01-24T15:44:59.551280Z	info	Opening status port 15020
+2025-01-24T15:44:59.580679Z	info	ads	All caches have been synced up in 43.649326ms, marking server ready
+2025-01-24T15:44:59.581261Z	info	xdsproxy	Initializing with upstream address "istiod.istio-system.svc:15012" and cluster "Kubernetes"
+2025-01-24T15:44:59.584026Z	info	Pilot SAN: [istiod.istio-system.svc]
+2025-01-24T15:44:59.586030Z	info	Starting proxy agent
+2025-01-24T15:44:59.586072Z	info	starting
+2025-01-24T15:44:59.586230Z	info	Envoy command: [-c etc/istio/proxy/envoy-rev.json --drain-time-s 45 --drain-strategy immediate --local-address-ip-version v4 --file-flush-interval-msec 1000 --disable-hot-restart --allow-unknown-static-fields --log-format %Y-%m-%dT%T.%fZ	%l	envoy %n %g:%#	%v	thread=%t -l warning --component-log-level misc:error --concurrency 2]
+2025-01-24T15:44:59.595820Z	info	sds	Starting SDS grpc server
+2025-01-24T15:44:59.596018Z	info	starting Http service at 127.0.0.1:15004
+2025-01-24T15:44:59.702567Z	info	xdsproxy	connected to upstream XDS server: istiod.istio-system.svc:15012
+2025-01-24T15:44:59.745270Z	info	ads	ADS: new connection for node:istio-ingress-94f46b75b-m9zx9.istio-ingress-1
+2025-01-24T15:44:59.747107Z	info	ads	ADS: new connection for node:istio-ingress-94f46b75b-m9zx9.istio-ingress-2
+2025-01-24T15:44:59.769637Z	info	cache	generated new workload certificate	latency=188.683305ms ttl=23h59m59.230367586s
+2025-01-24T15:44:59.769771Z	info	cache	Root cert has changed, start rotating root cert
+2025-01-24T15:44:59.769798Z	info	ads	XDS: Incremental Pushing ConnectedEndpoints:2 Version:
+2025-01-24T15:44:59.769854Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.230148053s
+2025-01-24T15:44:59.769901Z	info	cache	returned workload certificate from cache	ttl=23h59m59.230103052s
+2025-01-24T15:44:59.770171Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.229830948s
+2025-01-24T15:44:59.770881Z	info	ads	SDS: PUSH request for node:istio-ingress-94f46b75b-m9zx9.istio-ingress resources:1 size:1.1kB resource:ROOTCA
+2025-01-24T15:44:59.770949Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.229052117s
+2025-01-24T15:44:59.770961Z	info	ads	SDS: PUSH request for node:istio-ingress-94f46b75b-m9zx9.istio-ingress resources:1 size:4.0kB resource:default
+2025-01-24T15:45:00.346643Z	info	Readiness succeeded in 818.275462ms
+2025-01-24T15:45:00.347131Z	info	Envoy proxy is ready
+2025-01-24T16:14:15.049255Z	info	xdsproxy	connected to upstream XDS server: istiod.istio-system.svc:15012
+2025-01-24T16:47:11.037558Z	info	xdsproxy	connected to upstream XDS server: istiod.istio-system.svc:15012
+2025-01-24T17:20:19.139070Z	info	xdsproxy	connected to upstream XDS server: istiod.istio-system.svc:15012
+2025-01-24T17:48:43.352313Z	info	xdsproxy	connected to upstream XDS server: istiod.istio-system.svc:15012
+2025-01-24T18:16:51.944936Z	info	xdsproxy	connected to upstream XDS server: istiod.istio-system.svc:15012

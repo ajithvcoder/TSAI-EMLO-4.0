@@ -1,0 +1,166 @@
+NAMESPACE              NAME                                                                  READY   STATUS      RESTARTS       AGE
+cert-manager           pod/cert-manager-57d855897b-4qrjz                                     1/1     Running     0              3h28m
+cert-manager           pod/cert-manager-cainjector-5c7f79b84b-gd7kq                          1/1     Running     0              3h28m
+cert-manager           pod/cert-manager-webhook-657b9f664c-dpswh                             1/1     Running     0              3h28m
+default                pod/kserve-controller-manager-6cb87dcc55-zn4p2                        3/3     Running     1 (126m ago)   126m
+default                pod/modelmesh-controller-6f5bdb97db-w5hwp                             2/2     Running     2 (126m ago)   126m
+default                pod/torchserve-sd3-predictor-6b58b568fc-vvr95                         2/2     Running     0              99m
+default                pod/ui-server-59cb8d9f96-7wzcz                                        2/2     Running     0              99m
+default                pod/web-server-669c6cc8f8-57x59                                       2/2     Running     0              83m
+default                pod/web-server-669c6cc8f8-dkj7z                                       2/2     Running     0              83m
+gpu-operator           pod/gpu-feature-discovery-8jgv4                                       1/1     Running     0              3h26m
+gpu-operator           pod/gpu-operator-1737729690-node-feature-discovery-gc-748b944fmlvwt   1/1     Running     0              3h26m
+gpu-operator           pod/gpu-operator-1737729690-node-feature-discovery-master-5f95z9r94   1/1     Running     0              3h26m
+gpu-operator           pod/gpu-operator-1737729690-node-feature-discovery-worker-8s5hw       1/1     Running     0              3h26m
+gpu-operator           pod/gpu-operator-1737729690-node-feature-discovery-worker-pv46g       1/1     Running     0              3h26m
+gpu-operator           pod/gpu-operator-1737729690-node-feature-discovery-worker-tbwww       1/1     Running     0              3h26m
+gpu-operator           pod/gpu-operator-5c768d9876-rdwqn                                     1/1     Running     0              3h26m
+gpu-operator           pod/nvidia-container-toolkit-daemonset-gpfkk                          1/1     Running     0              3h26m
+gpu-operator           pod/nvidia-cuda-validator-clqb8                                       0/1     Completed   0              3h26m
+gpu-operator           pod/nvidia-dcgm-exporter-8stfx                                        1/1     Running     0              3h26m
+gpu-operator           pod/nvidia-device-plugin-daemonset-2smjz                              1/1     Running     0              3h26m
+gpu-operator           pod/nvidia-operator-validator-46msc                                   1/1     Running     0              3h26m
+istio-ingress          pod/istio-ingress-94f46b75b-m9zx9                                     1/1     Running     0              143m
+istio-system           pod/grafana-6678df5b54-tc62z                                          1/1     Running     0              33m
+istio-system           pod/istiod-7dbdb8d5bd-jdp4j                                           1/1     Running     0              145m
+istio-system           pod/jaeger-5d9674bcb9-mtbhv                                           1/1     Running     0              33m
+istio-system           pod/kiali-8597b99bd6-4pr6f                                            1/1     Running     0              33m
+istio-system           pod/prometheus-75595fd888-pfzjn                                       2/2     Running     0              33m
+kube-system            pod/aws-load-balancer-controller-86865b967-f7nmm                      1/1     Running     0              3h35m
+kube-system            pod/aws-load-balancer-controller-86865b967-nb2n6                      1/1     Running     0              3h35m
+kube-system            pod/aws-node-qc68g                                                    2/2     Running     0              3h47m
+kube-system            pod/aws-node-xtcbj                                                    2/2     Running     0              3h47m
+kube-system            pod/aws-node-z2tzl                                                    2/2     Running     0              3h47m
+kube-system            pod/coredns-6c55b85fbb-6dqzj                                          1/1     Running     0              3h51m
+kube-system            pod/coredns-6c55b85fbb-7gxmq                                          1/1     Running     0              3h51m
+kube-system            pod/ebs-csi-controller-5d7b685957-575hg                               6/6     Running     0              3h42m
+kube-system            pod/ebs-csi-controller-5d7b685957-xvhvx                               6/6     Running     0              3h42m
+kube-system            pod/ebs-csi-node-gfx9c                                                3/3     Running     0              3h42m
+kube-system            pod/ebs-csi-node-qnjnj                                                3/3     Running     0              3h42m
+kube-system            pod/ebs-csi-node-z6ggq                                                3/3     Running     0              3h42m
+kube-system            pod/kube-proxy-qzk7g                                                  1/1     Running     0              3h47m
+kube-system            pod/kube-proxy-t866s                                                  1/1     Running     0              3h47m
+kube-system            pod/kube-proxy-z4v28                                                  1/1     Running     0              3h47m
+kube-system            pod/metrics-server-fd7d8565c-8w2d2                                    1/1     Running     0              33m
+kubernetes-dashboard   pod/kubernetes-dashboard-api-774cdb6b46-t7htc                         1/1     Running     0              3h31m
+kubernetes-dashboard   pod/kubernetes-dashboard-auth-6b55bb99c7-nrdgr                        1/1     Running     0              3h31m
+kubernetes-dashboard   pod/kubernetes-dashboard-kong-78fd98d579-cphzc                        1/1     Running     0              3h31m
+kubernetes-dashboard   pod/kubernetes-dashboard-metrics-scraper-6c8d6bb74d-826wm             1/1     Running     0              3h31m
+kubernetes-dashboard   pod/kubernetes-dashboard-web-86495b6c8f-2szpf                         1/1     Running     0              3h31m
+
+NAMESPACE              NAME                                           TYPE           CLUSTER-IP       EXTERNAL-IP                                                                      PORT(S)                                          AGE
+cert-manager           service/cert-manager                           ClusterIP      10.100.50.159    <none>                                                                           9402/TCP                                         3h28m
+cert-manager           service/cert-manager-cainjector                ClusterIP      10.100.121.155   <none>                                                                           9402/TCP                                         3h28m
+cert-manager           service/cert-manager-webhook                   ClusterIP      10.100.162.45    <none>                                                                           443/TCP,9402/TCP                                 3h28m
+default                service/kserve-controller-manager-service      ClusterIP      10.100.10.112    <none>                                                                           8443/TCP                                         126m
+default                service/kserve-webhook-server-service          ClusterIP      10.100.95.105    <none>                                                                           443/TCP                                          126m
+default                service/kubernetes                             ClusterIP      10.100.0.1       <none>                                                                           443/TCP                                          3h54m
+default                service/modelmesh-serving                      ClusterIP      None             <none>                                                                           8033/TCP,8008/TCP,2112/TCP                       3h27m
+default                service/modelmesh-webhook-server-service       ClusterIP      10.100.128.213   <none>                                                                           9443/TCP                                         126m
+default                service/torchserve-sd3-predictor               ClusterIP      10.100.122.84    <none>                                                                           80/TCP                                           99m
+default                service/ui-server-service                      ClusterIP      10.100.232.70    <none>                                                                           80/TCP                                           99m
+default                service/web-server-service                     ClusterIP      10.100.150.135   <none>                                                                           80/TCP                                           99m
+gpu-operator           service/gpu-operator                           ClusterIP      10.100.72.63     <none>                                                                           8080/TCP                                         3h26m
+gpu-operator           service/nvidia-dcgm-exporter                   ClusterIP      10.100.6.119     <none>                                                                           9400/TCP                                         3h26m
+istio-ingress          service/istio-ingress                          LoadBalancer   10.100.251.79    k8s-istioing-istioing-7d09313456-2023a0a0769473e1.elb.ap-south-1.amazonaws.com   15021:32323/TCP,80:30831/TCP,443:32026/TCP       143m
+istio-system           service/grafana                                ClusterIP      10.100.13.64     <none>                                                                           3000/TCP                                         33m
+istio-system           service/istiod                                 ClusterIP      10.100.193.222   <none>                                                                           15010/TCP,15012/TCP,443/TCP,15014/TCP            145m
+istio-system           service/jaeger-collector                       ClusterIP      10.100.19.126    <none>                                                                           14268/TCP,14250/TCP,9411/TCP,4317/TCP,4318/TCP   33m
+istio-system           service/kiali                                  ClusterIP      10.100.105.21    <none>                                                                           20001/TCP,9090/TCP                               33m
+istio-system           service/prometheus                             ClusterIP      10.100.126.37    <none>                                                                           9090/TCP                                         33m
+istio-system           service/tracing                                ClusterIP      10.100.93.50     <none>                                                                           80/TCP,16685/TCP                                 33m
+istio-system           service/zipkin                                 ClusterIP      10.100.75.94     <none>                                                                           9411/TCP                                         33m
+kube-system            service/aws-load-balancer-webhook-service      ClusterIP      10.100.181.53    <none>                                                                           443/TCP                                          3h35m
+kube-system            service/eks-extension-metrics-api              ClusterIP      10.100.134.26    <none>                                                                           443/TCP                                          3h54m
+kube-system            service/kube-dns                               ClusterIP      10.100.0.10      <none>                                                                           53/UDP,53/TCP,9153/TCP                           3h51m
+kube-system            service/metrics-server                         ClusterIP      10.100.31.213    <none>                                                                           443/TCP                                          3h31m
+kubernetes-dashboard   service/kubernetes-dashboard-api               ClusterIP      10.100.13.184    <none>                                                                           8000/TCP                                         3h31m
+kubernetes-dashboard   service/kubernetes-dashboard-auth              ClusterIP      10.100.201.87    <none>                                                                           8000/TCP                                         3h31m
+kubernetes-dashboard   service/kubernetes-dashboard-kong-proxy        ClusterIP      10.100.252.39    <none>                                                                           443/TCP                                          3h31m
+kubernetes-dashboard   service/kubernetes-dashboard-metrics-scraper   ClusterIP      10.100.102.253   <none>                                                                           8000/TCP                                         3h31m
+kubernetes-dashboard   service/kubernetes-dashboard-web               ClusterIP      10.100.8.117     <none>                                                                           8000/TCP                                         3h31m
+
+NAMESPACE      NAME                                                                   DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                                                          AGE
+gpu-operator   daemonset.apps/gpu-feature-discovery                                   1         1         1       1            1           nvidia.com/gpu.deploy.gpu-feature-discovery=true                       3h26m
+gpu-operator   daemonset.apps/gpu-operator-1737729690-node-feature-discovery-worker   3         3         3       3            3           <none>                                                                 3h26m
+gpu-operator   daemonset.apps/nvidia-container-toolkit-daemonset                      1         1         1       1            1           nvidia.com/gpu.deploy.container-toolkit=true                           3h26m
+gpu-operator   daemonset.apps/nvidia-dcgm-exporter                                    1         1         1       1            1           nvidia.com/gpu.deploy.dcgm-exporter=true                               3h26m
+gpu-operator   daemonset.apps/nvidia-device-plugin-daemonset                          1         1         1       1            1           nvidia.com/gpu.deploy.device-plugin=true                               3h26m
+gpu-operator   daemonset.apps/nvidia-device-plugin-mps-control-daemon                 0         0         0       0            0           nvidia.com/gpu.deploy.device-plugin=true,nvidia.com/mps.capable=true   3h26m
+gpu-operator   daemonset.apps/nvidia-driver-daemonset                                 0         0         0       0            0           nvidia.com/gpu.deploy.driver=true                                      3h26m
+gpu-operator   daemonset.apps/nvidia-mig-manager                                      0         0         0       0            0           nvidia.com/gpu.deploy.mig-manager=true                                 3h26m
+gpu-operator   daemonset.apps/nvidia-operator-validator                               1         1         1       1            1           nvidia.com/gpu.deploy.operator-validator=true                          3h26m
+kube-system    daemonset.apps/aws-node                                                3         3         3       3            3           <none>                                                                 3h51m
+kube-system    daemonset.apps/ebs-csi-node                                            3         3         3       3            3           kubernetes.io/os=linux                                                 3h42m
+kube-system    daemonset.apps/ebs-csi-node-windows                                    0         0         0       0            0           kubernetes.io/os=windows                                               3h42m
+kube-system    daemonset.apps/kube-proxy                                              3         3         3       3            3           <none>                                                                 3h51m
+
+NAMESPACE              NAME                                                                    READY   UP-TO-DATE   AVAILABLE   AGE
+cert-manager           deployment.apps/cert-manager                                            1/1     1            1           3h28m
+cert-manager           deployment.apps/cert-manager-cainjector                                 1/1     1            1           3h28m
+cert-manager           deployment.apps/cert-manager-webhook                                    1/1     1            1           3h28m
+default                deployment.apps/kserve-controller-manager                               1/1     1            1           126m
+default                deployment.apps/modelmesh-controller                                    1/1     1            1           126m
+default                deployment.apps/modelmesh-serving-mlserver-1.x                          0/0     0            0           126m
+default                deployment.apps/modelmesh-serving-ovms-1.x                              0/0     0            0           126m
+default                deployment.apps/modelmesh-serving-torchserve-0.x                        0/0     0            0           126m
+default                deployment.apps/modelmesh-serving-triton-2.x                            0/0     0            0           126m
+default                deployment.apps/torchserve-sd3-predictor                                1/1     1            1           99m
+default                deployment.apps/ui-server                                               1/1     1            1           99m
+default                deployment.apps/web-server                                              2/2     2            2           99m
+gpu-operator           deployment.apps/gpu-operator                                            1/1     1            1           3h26m
+gpu-operator           deployment.apps/gpu-operator-1737729690-node-feature-discovery-gc       1/1     1            1           3h26m
+gpu-operator           deployment.apps/gpu-operator-1737729690-node-feature-discovery-master   1/1     1            1           3h26m
+istio-ingress          deployment.apps/istio-ingress                                           1/1     1            1           143m
+istio-system           deployment.apps/grafana                                                 1/1     1            1           33m
+istio-system           deployment.apps/istiod                                                  1/1     1            1           145m
+istio-system           deployment.apps/jaeger                                                  1/1     1            1           33m
+istio-system           deployment.apps/kiali                                                   1/1     1            1           33m
+istio-system           deployment.apps/prometheus                                              1/1     1            1           33m
+kube-system            deployment.apps/aws-load-balancer-controller                            2/2     2            2           3h35m
+kube-system            deployment.apps/coredns                                                 2/2     2            2           3h51m
+kube-system            deployment.apps/ebs-csi-controller                                      2/2     2            2           3h42m
+kube-system            deployment.apps/metrics-server                                          1/1     1            1           3h31m
+kubernetes-dashboard   deployment.apps/kubernetes-dashboard-api                                1/1     1            1           3h31m
+kubernetes-dashboard   deployment.apps/kubernetes-dashboard-auth                               1/1     1            1           3h31m
+kubernetes-dashboard   deployment.apps/kubernetes-dashboard-kong                               1/1     1            1           3h31m
+kubernetes-dashboard   deployment.apps/kubernetes-dashboard-metrics-scraper                    1/1     1            1           3h31m
+kubernetes-dashboard   deployment.apps/kubernetes-dashboard-web                                1/1     1            1           3h31m
+
+NAMESPACE              NAME                                                                               DESIRED   CURRENT   READY   AGE
+cert-manager           replicaset.apps/cert-manager-57d855897b                                            1         1         1       3h28m
+cert-manager           replicaset.apps/cert-manager-cainjector-5c7f79b84b                                 1         1         1       3h28m
+cert-manager           replicaset.apps/cert-manager-webhook-657b9f664c                                    1         1         1       3h28m
+default                replicaset.apps/kserve-controller-manager-6cb87dcc55                               1         1         1       126m
+default                replicaset.apps/modelmesh-controller-6f5bdb97db                                    1         1         1       126m
+default                replicaset.apps/modelmesh-serving-mlserver-1.x-57d65d9fdd                          0         0         0       126m
+default                replicaset.apps/modelmesh-serving-ovms-1.x-5488c8f4f9                              0         0         0       126m
+default                replicaset.apps/modelmesh-serving-torchserve-0.x-67f9485cb9                        0         0         0       126m
+default                replicaset.apps/modelmesh-serving-triton-2.x-66756bc646                            0         0         0       126m
+default                replicaset.apps/torchserve-sd3-predictor-6b58b568fc                                1         1         1       99m
+default                replicaset.apps/ui-server-59cb8d9f96                                               1         1         1       99m
+default                replicaset.apps/web-server-669c6cc8f8                                              2         2         2       99m
+gpu-operator           replicaset.apps/gpu-operator-1737729690-node-feature-discovery-gc-748b944f4        1         1         1       3h26m
+gpu-operator           replicaset.apps/gpu-operator-1737729690-node-feature-discovery-master-5f95bb9cbb   1         1         1       3h26m
+gpu-operator           replicaset.apps/gpu-operator-5c768d9876                                            1         1         1       3h26m
+istio-ingress          replicaset.apps/istio-ingress-94f46b75b                                            1         1         1       143m
+istio-system           replicaset.apps/grafana-6678df5b54                                                 1         1         1       33m
+istio-system           replicaset.apps/istiod-7dbdb8d5bd                                                  1         1         1       145m
+istio-system           replicaset.apps/jaeger-5d9674bcb9                                                  1         1         1       33m
+istio-system           replicaset.apps/kiali-8597b99bd6                                                   1         1         1       33m
+istio-system           replicaset.apps/prometheus-75595fd888                                              1         1         1       33m
+kube-system            replicaset.apps/aws-load-balancer-controller-86865b967                             2         2         2       3h35m
+kube-system            replicaset.apps/coredns-6c55b85fbb                                                 2         2         2       3h51m
+kube-system            replicaset.apps/ebs-csi-controller-5d7b685957                                      2         2         2       3h42m
+kube-system            replicaset.apps/metrics-server-d5865ff47                                           0         0         0       3h31m
+kube-system            replicaset.apps/metrics-server-fd7d8565c                                           1         1         1       33m
+kubernetes-dashboard   replicaset.apps/kubernetes-dashboard-api-774cdb6b46                                1         1         1       3h31m
+kubernetes-dashboard   replicaset.apps/kubernetes-dashboard-auth-6b55bb99c7                               1         1         1       3h31m
+kubernetes-dashboard   replicaset.apps/kubernetes-dashboard-kong-78fd98d579                               1         1         1       3h31m
+kubernetes-dashboard   replicaset.apps/kubernetes-dashboard-metrics-scraper-6c8d6bb74d                    1         1         1       3h31m
+kubernetes-dashboard   replicaset.apps/kubernetes-dashboard-web-86495b6c8f                                1         1         1       3h31m
+
+NAMESPACE       NAME                                                           REFERENCE                             TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+default         horizontalpodautoscaler.autoscaling/torchserve-sd3-predictor   Deployment/torchserve-sd3-predictor   cpu: 0%/80%   1         1         1          99m
+istio-ingress   horizontalpodautoscaler.autoscaling/istio-ingress              Deployment/istio-ingress              cpu: 4%/80%   1         5         1          143m
+istio-system    horizontalpodautoscaler.autoscaling/istiod                     Deployment/istiod                     cpu: 0%/80%   1         5         1          145m

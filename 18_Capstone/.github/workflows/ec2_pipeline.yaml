@@ -1,0 +1,239 @@
+name: Z Debug - E2E-CI-CD-Build-DataCollect-Train-Test-Report-Deploy
+on: 
+  workflow_dispatch:
+jobs:
+
+  build-and-push-ecr-image:
+    name: Build and push ECR image
+    runs-on: ubuntu-latest
+    outputs:
+      commit_id: ${{ steps.get_commit_id.outputs.commit_id }}
+      registry: ${{ steps.login-ecr.outputs.registry }}
+      docker_username: ${{ steps.login-ecr.outputs.docker_username_306093656765_dkr_ecr_ap_south_1_amazonaws_com }}
+      docker_password: ${{ steps.login-ecr.outputs.docker_password_306093656765_dkr_ecr_ap_south_1_amazonaws_com }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Utilities
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq unzip
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'false'
+
+      - name: Get latest commit ID
+        id: get_commit_id
+        run: |
+          latest_commit=$(git rev-parse HEAD)
+          echo "::set-output name=commit_id::$latest_commit"
+
+
+      - name: Display the commit ID
+        run: |
+          echo "Latest commit ID is: ${{ steps.get_commit_id.outputs.commit_id }}"
+
+
+      # - name: Build, tag, and push image to Amazon ECR
+      #   id: build-image
+      #   env:
+      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+      #     IMAGE_TAG: latest
+      #   run: |
+      #     # Build a docker container and
+      #     # push it to ECR so that it can
+      #     # be deployed to ECS.
+      #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+      #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      #     # Use below command if above set-output is deprecated - TODO: Check if its saving the name properly
+      #     # echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+  launch-runner:
+    runs-on: ubuntu-latest
+    needs: build-and-push-ecr-image
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      # - uses: iterative/setup-cml@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Display the commit ID
+        run: |
+          echo "Latest commit ID is: ${{ needs.build-and-push-ecr-image.outputs.commit_id }}"
+
+      - name: Get latest commit ID
+        id: get_commit_id_runner
+        run: |
+          echo "::set-output name=commit_id::${{ needs.build-and-push-ecr-image.outputs.commit_id }}"
+
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2.3.9
+        with:
+          mode: start
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          # Normal instance
+          # ec2-image-id: ami-0e35ddab05955cf57  
+          # ec2-instance-type: t3a.medium
+
+          # AMI with CUDA/GPU drivers
+          ec2-image-id: ami-01654480b8a1994bd
+          ec2-instance-type: g4dn.xlarge
+
+          subnet-id: subnet-0890d22a65f85adcb
+          security-group-id: sg-00fc9c92dc8bd2ea7 # vpc-0bee66831ea737000
+          market-type: "spot"
+
+  do-the-job:
+    name: Do the job on the runner
+    needs: launch-runner # required to start the main job when the runner is ready
+    runs-on: ${{ needs.launch-runner.outputs.label }} # run the job on the newly created runner
+    steps:
+      - name: Hello World
+        run: echo 'Hello World!'
+
+  stop-runner:
+    name: Stop self-hosted EC2 runner
+    needs:
+      - launch-runner # required to get output from the start-runner job
+      - do-the-job # required to wait when the main job is done
+    runs-on: ubuntu-latest
+    if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Stop EC2 runner
+        uses: machulav/ec2-github-runner@v2.3.9
+        with:
+          mode: stop
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.launch-runner.outputs.label }}
+          ec2-instance-id: ${{ needs.launch-runner.outputs.ec2-instance-id }}
+
+
+      # - name: Deploy runner on AWS EC2 
+      #   env:
+      #     REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     AWS_REGION: ${{ secrets.AWS_REGION }}
+      #   run: |
+      #     cml runner launch \
+      #     --cloud=aws \
+      #     --name=session-18 \
+      #     --cloud-region=ap-south-1 \
+      #     --cloud-type=g4dn.xlarge \
+      #     --cloud-hdd-size=64 \
+      #     --cloud-spot \
+      #     --single \
+      #     --labels=cml-gpu \
+      #     --idle-timeout=100 \
+      #     --cloud-gpu=nvidia-tesla-t4 \
+      #     --cloud-image=ghcr.io/iterative/cml:0-dvc3-base1
+
+      # - name: Verify runner registration
+      #   env:
+      #     REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      #   run: |
+      #     echo "Waiting for runner to register..."
+      #     attempt=0
+      #     max_attempts=15
+          
+      #     while [ $attempt -lt $max_attempts ]
+      #     do
+      #       echo "Checking if runner is registered (attempt $((attempt+1))/$max_attempts)..."
+      #       if cml runner list | grep "session-18"; then
+      #         echo "Runner successfully registered!"
+      #         break
+      #       fi
+            
+      #       attempt=$((attempt+1))
+      #       sleep 20
+      #     done
+          
+      #     if [ $attempt -eq $max_attempts ]; then
+      #       echo "Runner failed to register within timeout period"
+      #       echo "Runner logs:"
+      #       cml runner logs session-18 || echo "Could not get logs"
+      #       exit 1
+      #     fi
+
+  # train-and-deploy:
+  #     runs-on: [cml-gpu]
+  #     needs: [build-and-push-ecr-image, launch-runner]
+  #     outputs:
+  #       commit_id: ${{ steps.get_commit_id_ec2.outputs.commit_id }}
+  #     timeout-minutes: 20
+      
+  #     container:
+  #       # Note private registery we need credentials
+  #       # public registry : public.ecr.aws/s5u6u2t2/ajithvcoder/emlo-session-10-image
+  #       # image: 306093656765.dkr.ecr.ap-south-1.amazonaws.com/emlo-session-10-image
+  #       # image: pytorch/pytorch
+  #       image: docker://pytorch/pytorch:2.3.1-cuda11.8-cudnn8-runtime
+  #       options: --gpus all --workdir /workspace
+  #       credentials:
+  #           username: ${{ needs.build-and-push-ecr-image.outputs.docker_username }}
+  #           password: ${{ needs.build-and-push-ecr-image.outputs.docker_password }}
+  #       env:
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         AWS_REGION: ${{ secrets.AWS_REGION }}
+  #         DOCKER_AUTH_CONFIG: ${{ secrets.DOCKER_AUTH_CONFIG }}
+  #         REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  #         WORKDIR: /workspace
+
+  #     # runs-on: ubuntu-latest
+  #     steps:
+  #       - name: Verify EC2 Instance
+  #         run: |
+  #           DEBIAN_FRONTEND=noninteractive apt update && apt upgrade -y && apt install -y curl wget git unzip zip tar lsb-release
+
+  #           # AWS installation in a docker container/ ubuntu via terminal
+  #           # curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  #           # unzip awscliv2.zip
+  #           # ./aws/install -i ~/aws-cli -b ~/aws-cli/bin
+  #           # export PATH=/github/home/aws-cli/bin:$PATH
+  #           # apt-get install -y groff
+  #           # aws --version
+
+  #           echo "check folder information..."
+  #           ls -l /github/home/ || true
+  #           ls /github/home/  || true
+            
+
+  #           echo "Checking instance information..."
+  #           # Check if we're on EC2
+  #           # TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+  #           # curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-type
+            
+  #           echo "Checking system resources..."
+  #           lscpu
+  #           free -h
+  #           df -h
+  #           nvidia-smi  # This will show GPU if available

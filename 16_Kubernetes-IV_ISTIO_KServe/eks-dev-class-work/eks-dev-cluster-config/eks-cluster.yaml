@@ -1,0 +1,54 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: basic-cluster
+  region: ap-south-1
+  # region: us-west-2
+  version: "1.30"
+
+managedNodeGroups:
+  - name: ng-dedicated-1
+    instanceType: t3a.medium
+    desiredCapacity: 1
+    ssh:
+      allow: true # will use ~/.ssh/id_rsa.pub as the default ssh key
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        awsLoadBalancerController: true
+        certManager: true
+        externalDNS: true
+        ebs: true
+  - name: ng-spot-1
+    instanceType: t3a.medium
+    desiredCapacity: 1
+    ssh:
+      allow: true
+    spot: true
+    labels:
+      role: spot
+    propagateASGTags: true
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        awsLoadBalancerController: true
+        certManager: true
+        externalDNS: true
+        ebs: true
+  - name: ng-gpu-spot-1
+    instanceType: g6.2xlarge
+    desiredCapacity: 1
+    ssh:
+      allow: true
+    spot: true
+    labels:
+      role: spot
+    propagateASGTags: true
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        awsLoadBalancerController: true
+        certManager: true
+        externalDNS: true
+        ebs: true

@@ -1,0 +1,18 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "imagenet-vit"
+  annotations:
+    serving.kserve.io/enable-metric-aggregation: "true"
+    serving.kserve.io/enable-prometheus-scraping: "true"
+spec:
+  predictor:
+    serviceAccountName: s3-read-only
+    model:
+      modelFormat:
+        name: pytorch
+      storageUri: s3://mybucket-emlo-mumbai/kserve-ig/imagenet-vit/
+      resources:
+        limits:
+          cpu: 2600m
+          memory: 4Gi

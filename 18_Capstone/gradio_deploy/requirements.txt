@@ -1,0 +1,9 @@
+gradio==5.29.0 
+# pip install --upgrade gradio
+# pip show gradio - to check version on local 
+torch 
+torchvision 
+boto3 
+python-dotenv 
+pillow 
+psutil

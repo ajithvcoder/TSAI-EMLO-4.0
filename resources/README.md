@@ -2,6 +2,8 @@
 
 Has important links, tools, blogs or concepts that i learnt during EMLO-4.0
 
+Note: After session-12 most of the notes are stuck in Evernote. They have changed to pay only plan by default. So need to retrive after paying.
+
 ### Ready Docker usage platforms
 
 - gitpod.io

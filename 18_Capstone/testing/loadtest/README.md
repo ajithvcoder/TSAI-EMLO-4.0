@@ -1,0 +1,1 @@
+onnx is not supported for `ghcr.io/astral-sh/uv:python3.12-alpine`

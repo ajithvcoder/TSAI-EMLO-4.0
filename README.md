@@ -2,9 +2,13 @@
 
 🔬 EMLOV4 dives deep into the world of MLOps, exploring advanced techniques and tools crucial for success in production environments. From Docker and PyTorch Lightning to AWS and Kubernetes, this course equips you with the knowledge and skills needed to excel in the rapidly evolving field of machine learning operations.
 
+**Note:** Each of the repo may have repo secret and github workflow it was executed in seperate repos. This repo just contains all assignment solutions and they were not executed in this path or this reprository. However all the codes in this repo are executed in `ajithvcoder/emlo4-session-{n}-ajithvcoder` namespace where `n` is the session number. 
+
 Contains solutions for assignments and learning from **Extensive Machine Learning Operations - Version 4.0** course of The School of AI https://theschoolof.ai/#programs
 
 ![](./assets/EMLO4-1.gif)
+
+
 
 Website: [On Development]
 
@@ -68,12 +72,58 @@ Website: [On Development]
 
     An introduction to TorchServe, a PyTorch model serving library, and a hands-on session on deploying machine learning models using TorchServe.
 
+13. [Kubernetes-I Intro_EKS](./13_Kubernetes-I_Intro_EKS/)
+
+    This session provides an introduction to Kubernetes, a popular container orchestration platform, and its key concepts and components.
+
+14. [Kubernetes-II Helm](./14_Kubernetes-II_Helm/)
+
+    In this session, participants will learn how to monitor and configure Kubernetes clusters for machine learning workloads with knowledge on Helm.
+
+15. [Kubernetes-III ALB - AutoScaling](./15_Kubernetes-III_ALB_AutoScaling/)
+
+    This session will cover introduction to EKS, Kubernetes Service on AWS, Deploying a FastAPI - PyTorch Kuberentes Service on EKS, ALB, Cluster auto scaling, HPA
+
+16. [Kubernetes-IV ISTIO - KServe](./16_Kubernetes-IV_ISTIO_KServe/)
+
+    This session covers EBS Volumes, ISTIO and KServe, learning to deploy pytorch models on KServe
+
+
+17. [Canary Deployment & Monitoring](./17_CanaryDeployment/)
+
+    This session covers how to deploy models with Canary Rollout Strategy while monitoring it on Prometheus and Grafana
+
+18. [Capstone Project](./18_Capstone/)
+
+    This session is a final project where participants will apply the knowledge gained throughout the course to develop and deploy an end-to-end MLOps pipeline.
+
+
+
 **Important tools, method, configs, links**
 
-- [resource file](./resources/)
+- [resource file](./resources/) (needs update after session-12)
+
+
+## TODO
+
+- Add in bio website with all repo links
+- Update the resources link after session-12
 
 ## Updates
 
 - Every month end during course development
 
 - There is a [resource file](./resources/) in which i maintain that has concepts and tools which i learnt newly in EMLO-4.0 course.
+
+
+Thanks to [Satyajit Ghana](https://github.com/satyajitghana)
+for this course.
+
+### Note
+
+I really worked very hard to complete each of the assignments.
+
+Thus the course was completed
+
+![](./assets/pikachu-pokemon.gif)
+

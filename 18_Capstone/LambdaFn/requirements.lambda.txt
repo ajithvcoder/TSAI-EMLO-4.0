@@ -1,0 +1,9 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.6.0
+torchvision==0.21.0
+pillow==11.1.0
+gradio==5.12.0
+gradio_client==1.5.4
+psutil==7.0.0
+boto3==1.36.3
+pydantic==2.10.6

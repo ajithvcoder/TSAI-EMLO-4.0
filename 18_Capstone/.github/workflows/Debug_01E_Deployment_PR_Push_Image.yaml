@@ -1,0 +1,191 @@
+name: Z Debug - Deployment 01E - PR - Build Image
+
+on:
+  workflow_call:
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_REGION:
+        required: true
+      AWS_ECR_LOGIN_URI:
+        required: true
+      ECR_REPOSITORY_NAME:
+        required: true
+      AWS_SECURITY_GROUP_ID:
+        required: true
+      AWS_SUBNET_ID_1:
+        required: true
+      PERSONAL_ACCESS_TOKEN:
+        required: true
+
+# # When to run this workflow
+# on:
+#   workflow_dispatch:  # Manual trigger from GitHub UI
+  # Uncomment to enable automatic triggers
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
+# ECR_REPOSITORY_NAME
+# AWS_ECR_LOGIN_URI
+# Environment variables used across jobs
+env:
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  # S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
+  # S3_DATA_PATH: data/                #data/files/md5 
+
+jobs:
+
+  #----------------------------------------
+  # JOB 1: Launch EC2 instance with GPU for training
+  #----------------------------------------
+  launch-runner:
+    name: 🚀 Launch EC2 GPU Runner
+    runs-on: ubuntu-latest
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+      commit_id: ${{ steps.get_commit_id_runner.outputs.commit_id }}
+      
+    env:
+      TF_LOG: DEBUG
+      CML_VERBOSE: true 
+      
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # - name: Display the commit ID
+      #   run: |
+      #     echo "Latest commit ID is: ${{ needs.build-and-push-ecr-image.outputs.commit_id }}"
+
+      # - name: Get latest commit ID
+      #   id: get_commit_id_runner
+      #   run: |
+      #     echo "commit_id=${{ needs.build-and-push-ecr-image.outputs.commit_id }}" >> $GITHUB_OUTPUT
+      
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        # uses: machulav/ec2-github-runner@v2.3.9
+        uses: devin-purple/ec2-github-runner@97328aea29a7b1da7f840fd9434b3046dfcc07a9
+        with:
+          mode: start
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          # AMI with CUDA/GPU drivers
+          ec2-image-id: ami-01654480b8a1994bd
+          ec2-instance-type: g4dn.xlarge
+          ec2-volume-size: 96  
+          # AMI with CPU only
+          # ec2-image-id: ami-0e35ddab05955cf57
+          # ec2-image-id: ami-01654480b8a1994bd
+          # ec2-instance-type: t3a.xlarge
+          subnet-id: ${{ secrets.AWS_SUBNET_ID_1 }}
+          security-group-id: ${{ secrets.AWS_SECURITY_GROUP_ID }}
+          market-type: "spot"
+
+  #----------------------------------------
+  # JOB 3: Train model and deploy
+  #----------------------------------------
+  do-the-job:
+    name: Train Models and Deploy
+    needs: [launch-runner]
+    runs-on: ${{ needs.launch-runner.outputs.label }}
+    outputs:
+      commit_id: ${{ steps.get_commit_id_ec2.outputs.commit_id }}
+    timeout-minutes: 30
+    
+    steps:
+      # - uses: iterative/setup-cml@v2
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Test AWS CLI
+        run: |
+          # Now you can run any AWS CLI command
+          aws s3 ls  # Example command to list S3 buckets
+
+      # - name: Test GPU
+      #   run: |
+      #     # Now you can run any AWS CLI command
+      #     nvidia-smi
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_LOGIN_URI }}
+
+      # - name: Pull Docker image from ECR
+      #   run: |
+      #     docker pull ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+      #     ls -a
+
+
+      - name: Build and Push Docker Image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: latest
+        run: |
+          # Build development container image and push to ECR
+          echo "Building and pushing image to $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build -t ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest -f Dockerfile .
+          docker push ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+          echo "image=${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest" >> $GITHUB_OUTPUT
+
+
+
+  #----------------------------------------
+  # JOB 4: Stop EC2 runner after completion
+  #----------------------------------------
+  stop-runner:
+    name: Stop self-hosted EC2 runner
+    needs:
+      - launch-runner
+      - do-the-job
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
+      - name: Stop EC2 runner
+        # uses: ulav/ec2-githumachb-runner@v2.3.9
+        uses: devin-purple/ec2-github-runner@97328aea29a7b1da7f840fd9434b3046dfcc07a9
+        with:
+          mode: stop
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.launch-runner.outputs.label }}
+          ec2-instance-id: ${{ needs.launch-runner.outputs.ec2-instance-id }}
+
+
+# docker run -it --gpus=all \
+#             --name session-18-container \
+#             --shm-size=8g \
+#             -v "$(pwd):/workspace" \
+#             -e AWS_ACCESS_KEY_ID=AWS_ACCESS_KEY_ID \
+#             -e AWS_SECRET_ACCESS_KEY=AWS_SECRET_ACCESS_KEY \
+#             -e AWS_DEFAULT_REGION=AWS_REGION \
+#             -e AWS_REGION=AWS_REGION \
+#             emlo-18-train  \
+#             /bin/bash 

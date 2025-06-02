@@ -1,0 +1,288 @@
+[project]
+name = "mlops"
+version = "0.1.0"
+authors = [{name = "Muthu Kamalan", email = "muthukamalan98@gmail.com"}]
+license = {text = "MIT"}
+description = "MLOps End to End Projects"
+requires-python = "==3.12.0"
+dependencies = [
+]
+keywords = [
+  "uv", "mlops","k8s"
+]
+readme = "README.md"
+
+classifiers = [
+  "Development Status :: 1 - Production/Stable",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: MLOps",
+]
+
+
+[project.urls]
+Repository = "https://github.com/muthukamalan/???"
+Blog = "https://muthukamalan.github.io/"
+
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+
+
+[dependency-groups]
+develop  = [
+  "pandas==2.2.3",
+  "loguru==0.7.3",
+  "rootutils==1.0.7",
+  "timm==1.0.13",
+  "torchviz==0.0.3",
+  "torchmetrics==1.6.1",
+  "lightning==2.5.0.post0",
+  "lightning-utilities==0.12.0",
+  "pytorch-lightning==2.5.0.post0",
+  "scikit-learn==1.5.2",
+  "transformers==4.47.0",
+  
+  "matplotlib==3.10.0",
+  "seaborn==0.13.2",
+
+  "prometheus_client==0.21.1",
+
+  "dvc==3.59.1",
+  "dvc-data==3.16.9",
+  "dvc-http==2.32.0",
+  "dvc-objects==5.1.0",
+  "dvc-render==1.0.2",
+  "dvc-s3==3.2.0",
+  "dvc-studio-client==0.21.0",
+  "dvc-task==0.40.2",
+
+  "hydra-core==1.3.2",
+  "hydra-joblib-launcher==1.2.0",
+  "hydra-optuna-sweeper==1.2.0",
+  "optuna==2.10.1"
+]
+
+testing  = [
+  "pytest==8.3.4",
+  "pytest-cov==6.0.0"
+]
+
+prod     = [
+  "onnx==1.17.0",
+  "psutil>=7.0.0",
+  "onnxruntime==1.20.1",
+  "onnxruntime-genai==0.6.0",
+
+  "huggingface-hub==0.27.1",
+  "gradio==5.12.0",
+  "gradio_client==1.5.4",
+  "fastapi==0.115.6",
+  "uvicorn==0.32.1",
+  "requests==2.32.3",
+  "numpy==2.1.3",
+  "pillow==11.1.0",
+
+  "torchserve==0.12.0",
+  "torch-model-archiver==0.12.0",
+  "torch-workflow-archiver==0.2.15"
+]
+visuals  = [
+  "tensorboard==2.17.1",
+  "tensorboard-data-server==0.7.2",
+  "tensorboardX==2.6.2.2",
+  "wandb==0.19.6"
+]
+
+
+
+[project.optional-dependencies]
+cpu = [
+  "torch>=2.6.0",
+  "torchvision>=0.21.0",
+]
+cu124 = [
+  "torch>=2.6.0",
+  "torchvision>=0.21.0",
+  "nvgpu==0.10.0",
+]
+
+
+[tool.uv]
+cache-keys = [{ file = "**/*.toml" }]
+# default-groups = ["develop", "prod"]
+
+conflicts = [
+  [
+    { extra = "cpu" },
+    { extra = "cu124" },
+  ],
+]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu124", extra = "cu124" },
+]
+torchvision = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu124", extra = "cu124" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+
+
+
+
+
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+extend-exclude = [  
+  "@*",
+  "*.ipynb",
+    # Sphinx configuration is irrelevant
+  "docs/source/conf.py",
+  "mypyc/doc/conf.py",
+  # tests have more relaxed styling requirements
+  # fixtures have their own .pyi-specific configuration
+  "test-data/*",
+  "mypyc/test-data/*",
+  # typeshed has its own .pyi-specific configuration
+  "mypy/typeshed/*",
+]
+
+line-length = 88   # Same as Black.
+indent-width = 4
+respect-gitignore = true
+fix=true
+target-version = "py312"   # Assume Python 3.12
+
+[tool.ruff.lint]
+preview = true
+
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = [
+  "E",       # pycodestyle (error)
+  "F",       # pyflakes
+  "W",       # pycodestyle (warning)
+  "B",       # flake8-bugbear
+  "I",       # isort
+  "N",       # pep8-naming
+  "RUF100",  # Unused noqa comments
+  "PGH004",  # blanket noqa comments
+  "UP",      # pyupgrade
+  "C4",      # flake8-comprehensions
+  "SIM201", "SIM202",  # simplify comparisons involving not
+  "ISC001",  # implicitly concatenated string
+  "RET501", "RET502",  # better return None handling
+]
+# 2. Avoid enforcing line-length violations (`E501`)
+ignore = [
+  "B007",  # Loop control variable not used within the loop body.
+  "B011",  # Don't use assert False
+  "B023",  # Function definition does not bind loop variable
+  "E2",    # conflicts with black
+  "E402",  # module level import not at top of file
+  "E501",  # conflicts with black
+  "E721",  # Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks
+  "E731",  # Do not assign a `lambda` expression, use a `def`
+  "E741",  # Ambiguous variable name
+  "N818",  # Exception should be named with an Error suffix
+  "N806",  # UPPER_CASE used for constant local variables
+  "UP031", # Use format specifiers instead of percent format
+  "UP032", # 'f-string always preferable to format' is controversial
+  "C416",  # There are a few cases where it's nice to have names for the dict items
+  "E111"
+]
+
+
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = [
+    "F841",  # unused variable. ruff keeps the call, but mostly we want to get rid of it all
+    "F601",  # automatic fix might obscure issue
+    "F602",  # automatic fix might obscure issue
+    "B018",  # automatic fix might obscure issue
+    "UP036", # sometimes it's better to just noqa this
+]
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+exclude = ["*.ipynb"]
+
+
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = false
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"

@@ -1,0 +1,19 @@
+
+# @package hydra.launcher
+_target_: hydra_plugins.hydra_joblib_launcher.joblib_launcher.JoblibLauncher
+n_jobs: 1
+backend: null
+prefer: processes
+require: null
+verbose: 1
+timeout: null
+pre_dispatch: 2*n_jobs
+batch_size: auto
+temp_folder: null
+max_nbytes: null
+mmap_mode: r
+
+
+# don't go above [RunTimeError:: Please call `iter(combined_loader)` first.]
+# `NOT ABLE to UNDERSTAND :(`:: https://github.com/Lightning-AI/pytorch-lightning/issues/19373 
+# No activity:: https://github.com/openvinotoolkit/anomalib/issues/2078

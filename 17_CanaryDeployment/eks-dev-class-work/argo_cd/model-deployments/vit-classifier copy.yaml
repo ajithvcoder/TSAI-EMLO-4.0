@@ -1,0 +1,32 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "imagenet-vit"
+  # namespace: argocd
+  annotations:
+    serving.kserve.io/enable-metric-aggregation: "true"
+    serving.kserve.io/enable-prometheus-scraping: "true"
+    autoscaling.knative.dev/target: "1"
+spec:
+  predictor:
+    serviceAccountName: s3-read-only
+    model:
+      modelFormat:
+        name: pytorch
+      storageUri: s3://mybucket-emlo-mumbai/kserve-ig/imagenet-vit/
+      resources:
+        limits:
+          cpu: 2600m
+          memory: 4Gi
+    # pytorch:
+    #   protocolVersion: v1
+    #   storageUri: s3://mybucket-emlo-mumbai/kserve-ig/imagenet-vit/
+    #   # storageUri: s3://tsai-emlo/kserve-ig/fakeimagenet-vit/
+    #   image: pytorch/torchserve-kfs:0.12.0
+    #   resources:
+    #     limits:
+    #       cpu: 2600m
+    #       memory: 4Gi
+    #   env:
+    #     - name: TS_DISABLE_TOKEN_AUTHORIZATION
+    #       value: "true"

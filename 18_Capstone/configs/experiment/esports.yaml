@@ -1,0 +1,28 @@
+# @package _global_
+
+defaults:
+  - override /data: dsports
+  - override /model: msports
+  - override /callbacks: rich_progress_bar
+  - override /logger: tensorboard # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
+  - override /trainer: default
+
+ckpt_path:  ${paths.root_dir}/checkpoints/ckpts/sports.ckpt
+
+
+data:
+  batch_size: 16
+  num_workers: 12
+  pin_memory: False
+
+tags: 'sports'
+
+seed: 42
+train: False
+test: True
+
+trainer:
+  min_epochs: 1
+  max_epochs: 10
+
+name: sports

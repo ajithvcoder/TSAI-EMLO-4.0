@@ -1,0 +1,94 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "fastapi-mamba-model-2"
+  namespace: {{ .Values.namespace }}
+  annotations:
+    serving.kserve.io/enable-metric-aggregation: "true"
+    serving.kserve.io/enable-prometheus-scraping: "true"
+    autoscaling.knative.dev/target: "1"
+  labels:
+      app.kubernetes.io/name: fastapi-mamba-model-2
+      app.kubernetes.io/part-of: fastapi-app
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  predictor:
+    serviceAccountName: s3-read-only
+    pytorch:
+      protocolVersion: v1
+      storageUri: s3://mybucket-emlo-mumbai/kserve-ig/cat-classifier/
+      # storageUri: s3://tsai-emlo/kserve-ig/fakeimagenet-vit/
+      image: pytorch/torchserve-kfs:0.12.0
+      resources:
+        limits:
+          cpu: 2600m
+          memory: 4Gi
+      env:
+        - name: TS_DISABLE_TOKEN_AUTHORIZATION
+          value: "true"
+        # - name: MODEL_NAME
+        #   valueFrom:
+        #       configMapKeyRef:
+        #           name: fastapi-mamba-model-2-config-{{ .Values.configVersions.modelServer }}
+        #           key: model_name
+
+    # containers:
+    #   - name: kserve-container
+    #     image: "{{ .Values.modelServer.image.repository }}:{{ .Values.modelServer.image.tag }}"
+    #     imagePullPolicy: Always
+    #     protocolVersion: v1
+    #     storageUri: "s3://mybucket-emlo-mumbai/sd_small/"
+    #     resources:
+    #       limits:
+    #         cpu: "8"
+    #         memory: 16Gi
+    #     env:
+    #       - name: MODEL_NAME
+    #         valueFrom:
+    #             configMapKeyRef:
+    #                 name: fastapi-mamba-model-2-config-{{ .Values.configVersions.modelServer }}
+    #                 key: model_name
+    # custom:
+    #   protocolVersion: v1
+    #   storageUri: "s3://mybucket-emlo-mumbai/sd_small/"
+    #   image: "{{ .Values.modelServer.image.repository }}:{{ .Values.modelServer.image.tag }}"
+    #   imagePullPolicy: IfNotPresent
+    #   resources:
+    #     limits:
+    #       cpu: "8"
+    #       memory: 16Gi
+      #    nvidia.com/gpu: "1"
+      # ports:
+      #     - containerPort: 80
+      # resources:
+      #   limits:
+      #     cpu: "16"
+      #     memory: 32Gi
+      #     nvidia.com/gpu: "1"
+      # resources:
+      #   limits:
+      #     cpu: "8"
+      #     memory: "16Gi"
+      #     nvidia.com/gpu: "1"
+      #   requests:
+      #     cpu: "7"
+      #     memory: "14Gi"
+      #     nvidia.com/gpu: "1"
+      
+        # - name: TS_DISABLE_TOKEN_AUTHORIZATION
+        #   value: "true"
+        # # Model loading parameters
+        # - name: MODEL_LOAD_MAX_TRY
+        #   value: "20"  # Increase from default 10
+        # - name: MODEL_LOAD_DELAY
+        #   value: "60"  # Increase from default 30 seconds
+        # - name: MODEL_LOAD_TIMEOUT
+        #   value: "120"  # Increase from default 5 seconds
+        # # - name: MODEL_LOAD_CUSTOMIZED
+        # #   value: "false"
+        # # Additional TorchServe parameters
+        # - name: TS_RESPONSE_TIMEOUT
+        #   value: "1200"  # 20 minutes
+        # - name: TS_DEFAULT_WORKERS_PER_MODEL
+        #   value: "1" 

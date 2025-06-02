@@ -1,0 +1,45 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+iam:
+  withOIDC: true
+
+metadata:
+  name: basic-cluster
+  region: ap-south-1
+  version: "1.30"
+
+managedNodeGroups:
+  - name: ng-dedicated-1 # for pods with volumes
+    instanceType: t3a.xlarge
+    desiredCapacity: 1
+    ssh:
+      allow: true
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        awsLoadBalancerController: true
+        certManager: true
+        externalDNS: true
+        ebs: true
+  - name: ng-spot-3
+    # instanceSelector:
+    #   memory: "16"
+    #   vCPUs: 4
+    instanceTypes:
+    - t2.xlarge
+    - t3.xlarge
+    - t3a.xlarge
+    desiredCapacity: 6
+    spot: true
+    labels:
+      role: spot
+    ssh:
+      allow: true
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        awsLoadBalancerController: true
+        certManager: true
+        externalDNS: true
+        ebs: true

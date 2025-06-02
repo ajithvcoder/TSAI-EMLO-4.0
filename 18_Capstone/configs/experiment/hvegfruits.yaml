@@ -1,0 +1,84 @@
+# @package _global_
+
+defaults:
+  - override /data: dvegfruits
+  - override /model: mvegfruits
+  - override /callbacks: default
+  - override /logger: default
+  - override /trainer: default
+
+  # - override hydra/sweeper: optuna
+  # - override hydra/launcher: joblib
+  
+seed: 42
+
+data:
+  # inside normal gpu systems
+  batch_size: 64
+  num_workers: 4
+  # inside docker containers
+  # batch_size: 16
+  # num_workers: 2
+  pin_memory: True
+
+trainer:
+  min_epochs: 2
+  max_epochs: 3
+  # Config Gets 90% + accuracy without limiting data
+  # Helps in faster testing
+  # limit_train_batches: 0.05
+  # limit_test_batches:  0.05
+  # limit_val_batches: 0.05
+
+callbacks:
+  model_checkpoint:
+    dirpath: ${paths.output_dir}/checkpoints
+    monitor: "val/acc"
+    filename: "epoch_{epoch:03d}"
+    mode: "max"
+    save_top_k: 1
+    save_last: true
+
+
+task_name: "hparams"  #used in hydra-config to write logs
+script: false
+
+tags:
+  - vegfruits
+  - "hparams"
+
+
+# set False to skip model training
+train: True
+
+# evaluate on test set, using best model weights achieved during training
+# lightning chooses best weights based on the metric specified in checkpoint callback
+test: True
+
+
+hydra:
+  mode: MULTIRUN
+  sweeper:
+    sampler:
+      _target_: optuna.samplers.TPESampler
+      seed: 32
+      n_startup_trials: 1
+    direction: "minimize"   # test/loss_epoch  on return in train.py
+    study_name: optimal_searching
+    n_trials: 1
+    n_jobs: 1
+    params:
+      ++model.patch_size: choice(4, 8, 16)
+      ++model.embed_dim: choice(64, 96, 128)
+
+  launcher:
+    n_jobs: 1
+    verbose: 1
+    pre_dispatch: 2*n_jobs
+
+
+logger:
+  tensorboard:
+    name: patch_size${model.patch_size}-embed_dim${model.embed_dim}"
+
+name: vegfruits

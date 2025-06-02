@@ -1,0 +1,165 @@
+.
+├── assets
+│   ├── README.md
+│   ├── sports_class_distribution.png
+│   ├── sports_image_grid.png
+│   ├── sports_test_confusion_matrix.png
+│   ├── sports_val_confusion_matrix.png
+│   ├── vegfruits_class_distribution.png
+│   ├── vegfruits_image_grid.png
+│   └── vegfruits_train_confusion_matrix.png
+├── checkpoints
+│   ├── ckpts
+│   │   ├── sports.ckpt
+│   │   └── vegfruits.ckpt
+│   ├── classnames
+│   │   ├── sports.json
+│   │   └── vegfruits.json
+│   ├── model_stores
+│   │   ├── sports
+│   │   │   ├── config.properties
+│   │   │   ├── index_to_name.json
+│   │   │   └── msports.mar
+│   │   └── vegfruits
+│   │       ├── config.properties
+│   │       ├── index_to_name.json
+│   │       └── mvegfruits.mar
+│   ├── onnxs
+│   │   ├── sports.onnx
+│   │   └── vegfruits.onnx
+│   └── pths
+│       ├── sports_cpu.pt
+│       ├── sports.pt
+│       ├── vegfruits_cpu.pt
+│       └── vegfruits.pt
+├── configs
+│   ├── callbacks
+│   │   ├── default.yaml
+│   │   ├── early_stopping.yaml
+│   │   ├── learning_rate_monitor.yaml
+│   │   ├── model_checkpoint.yaml
+│   │   ├── model_summary.yaml
+│   │   ├── none.yaml
+│   │   └── rich_progress_bar.yaml
+│   ├── data
+│   │   ├── default.yaml
+│   │   ├── dsports.yaml
+│   │   └── dvegfruits.yaml
+│   ├── debug
+│   │   ├── default.yaml
+│   │   ├── fdr.yaml
+│   │   ├── limit.yaml
+│   │   ├── overfit.yaml
+│   │   └── profiler.yaml
+│   ├── experiment
+│   │   ├── default.yaml
+│   │   ├── esports.yaml
+│   │   ├── evegfruits.yaml
+│   │   ├── hsports.yaml
+│   │   └── hvegfruits.yaml
+│   ├── extras
+│   │   └── default.yaml
+│   ├── hydra
+│   │   ├── default.yaml
+│   │   ├── joblib.yaml
+│   │   └── optuna.yaml
+│   ├── local
+│   ├── logger
+│   │   ├── aim.yaml
+│   │   ├── comet.yaml
+│   │   ├── csv.yaml
+│   │   ├── default.yaml
+│   │   ├── many_loggers.yaml
+│   │   ├── mlflow.yaml
+│   │   ├── neptune.yaml
+│   │   ├── tensorboard.yaml
+│   │   └── wandb.yaml
+│   ├── model
+│   │   ├── default.yaml
+│   │   ├── msports.yaml
+│   │   └── mvegfruits.yaml
+│   ├── paths
+│   │   └── default.yaml
+│   ├── trainer
+│   │   ├── cpu.yaml
+│   │   ├── default.yaml
+│   │   └── gpu.yaml
+│   ├── eval.yaml
+│   └── train.yaml
+├── data
+│   ├── processed
+│   │   ├── sports
+│   │   │   ├── test
+│   │   │   ├── train
+│   │   │   ├── valid
+│   │   │   └── sports.csv
+│   │   └── vegfruits
+│   │       ├── test
+│   │       ├── train
+│   │       └── validation
+│   └── raw
+│       ├── fruit-and-vegetable-image-recognition.zip
+│       └── sports_data.zip
+├── DeployLambda
+│   ├── app_lambda.py
+│   ├── aws-req.txt
+│   ├── cdk.json
+│   ├── Dockerfile
+│   ├── main.py
+│   ├── pyproject.toml
+│   └── README.md
+├── Dockerspool
+│   ├── Dockerfile.fastapi.sports
+│   ├── Dockerfile.fastapi.vegfruits
+│   └── README.md
+├── K8SDeploy
+│   ├── ECRs
+│   ├── Helm
+│   └── README.md
+├── lightning_logs
+├── logs
+├── multirun
+├── notebooks
+│   ├── sportsmodel.ipynb
+│   └── vegfruitsmodel.ipynb
+├── outputs
+├── shscripts
+│   ├── download_zips.sh
+│   └── post_container.sh
+├── src
+│   ├── backend
+│   │   ├── fastapi_app
+│   │   │   ├── fapi_sports.py
+│   │   │   └── fapi_vegfruits.py
+│   │   ├── torch_local
+│   │   │   ├── datamodules
+│   │   │   ├── models
+│   │   │   ├── utils
+│   │   │   ├── eval.py
+│   │   │   └── train.py
+│   │   └── torchserve_app
+│   │       ├── metrics.yaml
+│   │       ├── README.md
+│   │       ├── sports_handler.py
+│   │       ├── sports_swagger.json
+│   │       ├── vegfruits_handler.py
+│   │       └── vegfruits_swagger.json
+│   ├── frontend
+│   │   └── nextjs
+│   └── middleware
+│       └── fastapi_app
+│           └── app.py
+├── testing
+│   ├── loadtest
+│   │   └── README.md
+│   └── unittest
+├── Dockerfile.devcontainer
+├── LICENSE
+├── Makefile
+├── project_structure.txt
+├── pyproject.toml
+├── README.md
+├── requirements.cpu.txt
+└── requirements.gpu.txt
+
+59 directories, 104 files

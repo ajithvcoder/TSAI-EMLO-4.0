@@ -1,0 +1,23 @@
+# @package hydra.sweeper
+sampler:
+  _target_: optuna.samplers.TPESampler
+  seed: 123
+  consider_prior: true
+  prior_weight: 1.0
+  consider_magic_clip: true
+  consider_endpoints: false
+  n_startup_trials: 3
+  n_ei_candidates: 24
+  multivariate: false
+  warn_independent_sampling: true
+_target_: hydra_plugins.hydra_optuna_sweeper.optuna_sweeper.OptunaSweeper
+direction: minimize
+storage: null
+study_name: optimal_searching
+n_trials: 2
+n_jobs: 16
+max_failure_rate: 0.0
+params:
+  # https://github.com/facebookresearch/hydra/discussions/2906
+  model.stem_type: choice('patch','overlap')
+      

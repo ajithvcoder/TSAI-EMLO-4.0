@@ -1,0 +1,23 @@
+schema: '2.0'
+stages:
+  train_vegfruits:
+    cmd: python src/backend/torch_local/train.py experiment=hvegfruits script=true
+    deps:
+    - path: src/backend/torch_local/train.py
+      hash: md5
+      md5: 029c1ae540112eefef4ac9e131acce3d
+      size: 6881
+  train_sports:
+    cmd: python src/backend/torch_local/train.py experiment=hsports script=true
+    deps:
+    - path: src/backend/torch_local/train.py
+      hash: md5
+      md5: 029c1ae540112eefef4ac9e131acce3d
+      size: 6881
+  transfer_to_s3:
+    cmd: python src/backend/torch_local/transfer_mar.py
+    deps:
+    - path: src/backend/torch_local/transfer_mar.py
+      hash: md5
+      md5: bc0924e6220855ebfcf6829a3ee89376
+      size: 3826

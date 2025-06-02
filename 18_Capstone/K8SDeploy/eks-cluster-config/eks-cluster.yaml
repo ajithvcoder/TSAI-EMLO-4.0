@@ -1,0 +1,107 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+iam:
+  withOIDC: true
+
+metadata:
+  name: basic-cluster-1
+  region: ap-south-1
+  # region: us-west-2
+  version: "1.30"
+
+managedNodeGroups:
+  - name: ng-dedicated-1
+    instanceType: t3a.xlarge
+    desiredCapacity: 1
+    ssh:
+      allow: true # will use ~/.ssh/id_rsa.pub as the default ssh key
+      # public key path is only for github actions - comment it out or use ~/.ssh/id_rsa.pub when in local
+      publicKeyPath: /root/.ssh/id_rsa.pub
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        awsLoadBalancerController: true
+        certManager: true
+        externalDNS: true
+        ebs: true
+  - name: ng-spot-1
+    instanceTypes:
+    - t2.xlarge
+    - t3.xlarge
+    - t3a.xlarge
+    # desiredCapacity: 1
+    minSize: 3 # 3
+    maxSize: 5  # 5
+    spot: true
+    labels:
+      role: spot
+    ssh:
+      allow: true
+      # public key path is only for github actions - comment it out or use ~/.ssh/id_rsa.pub when in local
+      publicKeyPath: /root/.ssh/id_rsa.pub
+    propagateASGTags: true
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        awsLoadBalancerController: true
+        certManager: true
+        externalDNS: true
+        ebs: true
+  # - name: ng-spot-2
+  #   instanceTypes:
+  #   - t2.xlarge
+  #   - t3.xlarge
+  #   - t3a.xlarge
+  #   # desiredCapacity: 1
+  #   minSize: 3 # 3
+  #   maxSize: 8  # 5
+  #   spot: true
+  #   labels:
+  #     role: spot
+  #   ssh:
+  #     allow: true
+  #   propagateASGTags: true
+  #   iam:
+  #     withAddonPolicies:
+  #       autoScaler: true
+  #       awsLoadBalancerController: true
+  #       certManager: true
+  #       externalDNS: true
+  #       ebs: true
+  # eksctl scale nodegroup --cluster=basic-cluster --nodes=6 ng-spot-3 --nodes-max=6
+  # eksctl delete nodegroup --cluster basic-cluster --name ng-spot-2
+  # eksctl create nodegroup --cluster basic-cluster --name ng-spot-2
+  # - name: ng-spot-2
+  #   instanceType: t3a.medium
+  #   desiredCapacity: 3
+  #   ssh:
+  #     allow: true
+  #   spot: true
+  #   labels:
+  #     role: spot
+  #   propagateASGTags: true
+  #   iam:
+  #     withAddonPolicies:
+  #       autoScaler: true
+  #       awsLoadBalancerController: true
+  #       certManager: true
+  #       externalDNS: true
+  #       ebs: true
+  # - name: ng-gpu-spot-1
+  #   # instanceType: g6.2xlarge
+  #   instanceType: g4dn.xlarge
+  #   desiredCapacity: 1
+  #   ssh:
+  #     allow: true
+  #   spot: true
+  #   labels:
+  #     role: spot
+  #   propagateASGTags: true
+  #   iam:
+  #     withAddonPolicies:
+  #       autoScaler: true
+  #       awsLoadBalancerController: true
+  #       certManager: true
+  #       externalDNS: true
+  #       ebs: true
