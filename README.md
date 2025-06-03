@@ -118,8 +118,6 @@ Website: [On Development]
 Thanks to [Satyajit Ghana](https://github.com/satyajitghana)
 for this course.
 
-### Note
-
 I really worked very hard to complete each of the assignments.
 
 Thus the course was completed
